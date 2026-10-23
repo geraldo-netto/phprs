@@ -130,7 +130,7 @@ pub(super) fn validate_rule(
     view: NodeView<'_>,
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
-    if matches!(rule, "member" | "parameter") {
+    if matches!(rule, "member" | "parameter" | "hook") {
         return declarations::validate(rule, &view, children);
     }
     if rule == "hooks" {

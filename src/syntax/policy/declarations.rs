@@ -25,6 +25,9 @@ fn admitted(
     view: &NodeView<'_>,
     children: Range<usize>,
 ) -> Option<&'static [&'static str]> {
+    if rule == "hook" {
+        return Some(&["T_FINAL"]);
+    }
     if rule == "parameter" {
         return Some(&[
             "T_PUBLIC",

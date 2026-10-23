@@ -529,3 +529,27 @@ fn promotion_modifier_applicability_phprs_105() {
         );
     }
 }
+
+#[test]
+fn hook_modifier_applicability_phprs_106() {
+    verify_sources_and_prefixes(&[
+        "<?php class C { public $x { final get => 1; final set => $value; } }",
+    ]);
+    for modifier in [
+        "public",
+        "protected",
+        "private",
+        "readonly",
+        "static",
+        "abstract",
+        "public(set)",
+        "protected(set)",
+        "private(set)",
+    ] {
+        let source = format!("<?php class C {{ public $x {{ {modifier} get => 1; }} }}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
