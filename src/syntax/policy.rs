@@ -87,9 +87,13 @@ impl NodeView<'_> {
         }
     }
 
-    fn destination(&self, mut index: usize) -> bool {
+    fn destination(&self, index: usize) -> bool {
+        self.wraps_to(index, "place")
+    }
+
+    fn wraps_to(&self, mut index: usize, target: &str) -> bool {
         while let Some(node) = self.nodes.get(index) {
-            if node.kind == SyntaxKind::Rule("place") {
+            if matches!(node.kind, SyntaxKind::Rule(name) if name == target) {
                 return true;
             }
             if !matches!(
@@ -123,7 +127,7 @@ pub(super) fn validate_rule(
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
     if rule == "expression" {
-        return validate_conditional(&view, children);
+        return validate_expression(&view, children);
     }
     if matches!(
         rule,
@@ -143,6 +147,23 @@ pub(super) fn validate_rule(
         return Ok(());
     }
     Err(view.diagnostic(children, "syntax requires a variable-like operand"))
+}
+
+fn validate_expression(view: &NodeView<'_>, children: Range<usize>) -> Result<(), Diagnostic> {
+    validate_conditional(view, children.clone())?;
+    let Some(indices) = view.edges.get(children.clone()) else {
+        return Ok(());
+    };
+    if indices.len() != 3 {
+        return Ok(());
+    }
+    let operator = view.nodes.get(indices[1]).map(|node| &node.kind);
+    if operator == Some(&SyntaxKind::Token("T_PIPE"))
+        && view.wraps_to(indices[2], "arrow_expression")
+    {
+        return Err(view.diagnostic(children, "pipe arrow functions require parentheses"));
+    }
+    Ok(())
 }
 
 fn validate_conditional(view: &NodeView<'_>, children: Range<usize>) -> Result<(), Diagnostic> {

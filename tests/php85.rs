@@ -223,3 +223,52 @@ fn setter_modifier_conflicts_phprs_057() {
         }
     }
 }
+
+#[test]
+fn pipe_forms_phprs_047() {
+    for expression in [
+        "$x |> f(...)",
+        "$x |> f(...) |> C::g(...)",
+        "$x |> $callback",
+        "$x |> 'strlen'",
+        "$x |> [$object, 'method']",
+        "$x |> new Invokable()",
+        "$x |> ($flag ? f(...) : g(...))",
+        "$x |> (fn($value) => $value + 1)",
+        "$x |> (static fn($value): int => $value)",
+        "$x |> function($value) { return $value; }",
+        "$x |> 42", // Callable validation requires runtime values.
+    ] {
+        let source = format!("<?php {expression};");
+        let tree = PhpParser
+            .parse(source.as_bytes(), DEFAULT_OPTIONS)
+            .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+        common::verify_tree(&tree);
+        for end in 0..source.len() {
+            if let Ok(tree) = PhpParser.parse(&source.as_bytes()[..end], DEFAULT_OPTIONS) {
+                common::verify_tree(&tree);
+            }
+        }
+    }
+}
+
+#[test]
+fn pipe_boundaries_phprs_047() {
+    for expression in [
+        "$x |> fn($value) => $value",
+        "$x |> static fn($value) => $value",
+        "$x |> #[A] fn($value) => $value",
+        "$x |>",
+        "|> f(...)",
+        "$x |> |> f(...)",
+        "$x | > f(...)",
+        "$x |> f(...,)",
+        "$x |> (fn($value) =>)",
+    ] {
+        let source = format!("<?php {expression};");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

@@ -14,6 +14,7 @@ is disclosed; this project does not claim strict clean-room separation.
 
 Documentation consulted on 2026-10-23:
 
+- [Functional operators](https://www.php.net/manual/en/language.operators.functional.php)
 - [PHP 8.5 language additions](https://www.php.net/manual/en/migration85.new-features.php)
 - [Operator precedence](https://www.php.net/manual/en/language.operators.precedence.php)
 - [Property hooks](https://www.php.net/manual/en/language.oop5.property-hooks.php)
@@ -72,7 +73,9 @@ and invalid prefix-mutation/reference operands must be rejected.
 Support arrays, references, unpacking, callable arguments, named arguments,
 first-class callables, closures, arrow functions, generators, match expressions,
 include/require/eval and language-defined expression forms. PHP 8.5 pipe and
-clone-call syntax belong to the current language contract. Void casts are admitted
+clone-call syntax belong to the current language contract. Pipe operands may be
+expressions; an arrow-function operand must be parenthesized, while callable
+validity depends on runtime values and stays outside syntax. Void casts are admitted
 where a value is discarded, not as value-producing expressions. Constant
 expression legality that requires compile-time evaluation remains outside syntax.
 
