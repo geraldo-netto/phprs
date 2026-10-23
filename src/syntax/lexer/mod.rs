@@ -102,7 +102,7 @@ impl<'source> Lexer<'source> {
         match self.mode {
             Mode::Html => Ok(self.html()),
             Mode::Code => self.code(),
-            Mode::Property => Ok(self.property()),
+            Mode::Property => self.property(),
             Mode::Text(text) => self.text(text).map(Some),
             Mode::Tail(text) => Ok(self.tail(text)),
             Mode::TextProperty(text) => Ok(Some(self.text_property(text))),

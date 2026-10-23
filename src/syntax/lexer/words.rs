@@ -90,17 +90,16 @@ impl Lexer<'_> {
         compound
     }
 
-    pub(super) fn property(&mut self) -> Option<u16> {
-        if whitespace(self.source[self.position]) {
-            self.position += 1;
-            return None;
+    pub(super) fn property(&mut self) -> Result<Option<u16>, Diagnostic> {
+        if self.skip_trivia()? {
+            return Ok(None);
         }
         self.mode = Mode::Code;
         if label_start(self.source[self.position]) {
             self.position = self.label_end(self.position);
-            return Some(T_STRING);
+            return Ok(Some(T_STRING));
         }
-        None
+        Ok(None)
     }
 
     pub(super) fn varname(&mut self) -> Option<u16> {

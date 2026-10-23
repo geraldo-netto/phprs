@@ -344,7 +344,7 @@ fn lexer_edge_cases_phprs_017() {
         b"0x10000000000000000",
         b"18446744073709551616",
         b"$o->match",
-        b"$o-> /* comment */ match",
+        // Property-comment behavior is covered by the PHP 8.5 fixture PHPRS-048/017.
         b"$o->\nmatch",
         b"$o?->match",
         b"C::class",

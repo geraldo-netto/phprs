@@ -159,3 +159,47 @@ fn independent_operator_grouping_phprs_093() {
         binary_group(source, operator, left, right);
     }
 }
+
+#[test]
+fn property_comments_phprs_048_phprs_017() {
+    for access in ["->", "?->"] {
+        for comment in ["/**/", "/* comment */", "// comment\n", "# comment\r\n"] {
+            for name in ["match", "class", "private", "function", "__PROPERTY__"] {
+                let source = format!("<?php echo $o{access} {comment} {name};");
+                let tree = PhpParser
+                    .parse(source.as_bytes(), DEFAULT_OPTIONS)
+                    .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+                common::verify_tree(&tree);
+                assert!(
+                    tree.nodes
+                        .iter()
+                        .any(|node| node.kind == SyntaxKind::Token("T_STRING")
+                            && &source[node.span.clone()] == name)
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn property_comment_boundaries_phprs_048() {
+    for source in [
+        "<?php echo $o-> /* unterminated",
+        "<?php echo $o?-> /* unterminated",
+        "<?php echo $o-> // comment\n ;",
+        "<?php echo $o-> # comment\n ;",
+    ] {
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+    for source in [
+        "<?php echo $o-> /* c */ {$name};",
+        "<?php echo \"{$o-> /* c */ match}\";",
+        "<?php echo \"$o-> /* c */ match\";",
+        "<?php echo $o-> /* c */ f()->x;",
+    ] {
+        common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
+    }
+}
