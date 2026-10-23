@@ -111,7 +111,8 @@ visibility, static, abstract and final; class constants admit visibility and
 final. Readonly and setter-visibility modifiers are property forms; property hooks
 permit final, with abstract access expressed by a bodyless get/set hook. An explicit setter
 visibility must be at least as restrictive as read visibility, including promoted
-and PHP 8.5 static properties; omitted read visibility is public.
+and PHP 8.5 static properties; omitted read visibility is public. Explicit setter
+visibility requires a property type, including promoted and hooked declarations.
 
 ## Results, ownership and limits
 

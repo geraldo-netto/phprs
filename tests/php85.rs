@@ -553,3 +553,28 @@ fn hook_modifier_applicability_phprs_106() {
         );
     }
 }
+
+#[test]
+fn asymmetric_properties_require_types_phprs_107() {
+    for modifiers in ["private(set)", "protected(set)", "public public(set)"] {
+        for declaration in [
+            format!("<?php class C {{ {modifiers} $x; }}"),
+            format!("<?php class C {{ static {modifiers} $x; }}"),
+            format!("<?php class C {{ {modifiers} $x {{ get => 1; }} }}"),
+            format!("<?php class C {{ function __construct({modifiers} $x) {{}} }}"),
+        ] {
+            assert!(
+                PhpParser
+                    .parse(declaration.as_bytes(), DEFAULT_OPTIONS)
+                    .is_err(),
+                "{declaration}"
+            );
+        }
+    }
+    verify_sources_and_prefixes(&[
+        "<?php class C { private(set) int $x; public private(set) static int $y; }",
+        "<?php class C { public private(set) int $x { get => 1; } }",
+        "<?php class C { function __construct(public private(set) int $x) {} }",
+        "<?php class C { public $x; static $y; function __construct(public $z) {} }",
+    ]);
+}

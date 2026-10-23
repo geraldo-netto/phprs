@@ -72,11 +72,46 @@ fn check(view: &NodeView<'_>, children: Range<usize>, allowed: &[&str]) -> Resul
     Ok(())
 }
 
+fn missing_type(view: &NodeView<'_>, children: Range<usize>) -> bool {
+    view.edges
+        .get(children)
+        .and_then(|indices| indices.get(2))
+        .and_then(|&index| view.nodes.get(index))
+        .is_some_and(|node| node.kind == SyntaxKind::Rule("type_opt") && node.children.is_empty())
+}
+
+fn validate_type(
+    rule: &str,
+    view: &NodeView<'_>,
+    children: Range<usize>,
+) -> Result<(), Diagnostic> {
+    if !missing_type(view, children.clone()) {
+        return Ok(());
+    }
+    let Some(modifiers) = modifier_children(rule, view, children) else {
+        return Ok(());
+    };
+    check(
+        view,
+        modifiers,
+        &[
+            "T_PUBLIC",
+            "T_PROTECTED",
+            "T_PRIVATE",
+            "T_STATIC",
+            "T_ABSTRACT",
+            "T_FINAL",
+            "T_READONLY",
+        ],
+    )
+}
+
 pub(super) fn validate(
     rule: &str,
     view: &NodeView<'_>,
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
+    validate_type(rule, view, children.clone())?;
     let Some(allowed) = admitted(rule, view, children.clone()) else {
         return Ok(());
     };
