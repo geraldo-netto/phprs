@@ -1,6 +1,7 @@
 //! Syntax-shape checks over independent tree contracts, without parser state.
 mod declarations;
 mod hooks;
+mod visibility;
 use crate::contracts::{Diagnostic, ErrorKind, SyntaxKind, SyntaxNode};
 use std::ops::Range;
 
@@ -227,6 +228,9 @@ fn validate_modifiers(view: &NodeView<'_>, children: Range<usize>) -> Result<(),
         seen[count] = Some(step.name);
         count += 1;
         next = step.next;
+    }
+    if !visibility::ordered(&seen[..count]) {
+        return Err(view.diagnostic(children, "setter visibility must not be more permissive"));
     }
     Ok(())
 }

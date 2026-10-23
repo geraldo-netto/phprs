@@ -485,3 +485,32 @@ fn setter_modifiers_require_properties_phprs_101() {
         }
     }
 }
+
+#[test]
+fn asymmetric_visibility_ordering_phprs_102() {
+    verify_sources_and_prefixes(&["<?php class C { public private(set) static int $calls = 0; }"]);
+    for (read, write, accepted) in [
+        ("public", "public(set)", true),
+        ("public", "protected(set)", true),
+        ("public", "private(set)", true),
+        ("protected", "protected(set)", true),
+        ("protected", "private(set)", true),
+        ("private", "private(set)", true),
+        ("protected", "public(set)", false),
+        ("private", "public(set)", false),
+        ("private", "protected(set)", false),
+    ] {
+        for modifiers in [format!("{read} {write}"), format!("{write} {read}")] {
+            for declaration in [
+                format!("<?php class C {{ {modifiers} int $x; }}"),
+                format!("<?php class C {{ function __construct({modifiers} int $x) {{}} }}"),
+            ] {
+                let result = PhpParser.parse(declaration.as_bytes(), DEFAULT_OPTIONS);
+                assert_eq!(result.is_ok(), accepted, "{declaration}");
+                if let Ok(tree) = result {
+                    common::verify_tree(&tree);
+                }
+            }
+        }
+    }
+}
