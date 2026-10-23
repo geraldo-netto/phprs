@@ -176,14 +176,17 @@ pattern_entry:
   | expression T_DOUBLE_ARROW list_pattern
   | expression T_DOUBLE_ARROW reference_mark expression
 ;
+class_name:
+    name | T_STATIC
+;
 class_target:
-    name %prec P_CONSTRUCT
+    class_name %prec P_CONSTRUCT
   | dynamic_class_target %prec P_CONSTRUCT
   | '(' expression ')'
 ;
 dynamic_class_target:
     variable
-  | name T_DOUBLE_COLON variable
+  | class_name T_DOUBLE_COLON variable
   | dynamic_class_target '[' expression ']'
   | dynamic_class_target T_OBJECT_OPERATOR property_selector
   | dynamic_class_target T_DOUBLE_COLON variable

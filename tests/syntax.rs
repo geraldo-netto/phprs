@@ -836,3 +836,26 @@ fn declaration_modifier_applicability_phprs_101() {
         common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
     }
 }
+
+#[test]
+fn late_static_class_targets_phprs_108() {
+    for (expression, accepted) in [
+        ("new static", true),
+        ("new static()", true),
+        ("new static::$class", true),
+        ("new static::$classes[0]()", true),
+        ("$x instanceof static", true),
+        ("$x instanceof static::$class", true),
+        ("new static->p", false),
+        ("new static[0]", false),
+        ("new static::X", false),
+    ] {
+        let source = format!("<?php {expression};");
+        assert_eq!(php_accepts(source.as_bytes()), accepted, "{source}");
+        let result = PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS);
+        assert_eq!(result.is_ok(), accepted, "{source}");
+        if let Ok(tree) = result {
+            common::verify_tree(&tree);
+        }
+    }
+}

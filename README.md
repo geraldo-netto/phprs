@@ -110,10 +110,10 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 78 Rust tests and 20 Python tests, including
+Verification on 2026-10-23 passes 79 Rust tests and 20 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP acceptance comparisons and deterministic generation of
-1,112 states and 633 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
+1,114 states and 635 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
 each measured production Rust function/closure. SonarQube complexity measurement
 is unavailable locally; its required evidence remains outstanding in
 [TODO.md](TODO.md). No full syntax-stage quality sign-off or production support

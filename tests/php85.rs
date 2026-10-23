@@ -331,6 +331,7 @@ fn clone_exit_malformed_phprs_054() {
 fn direct_construction_access_phprs_055() {
     verify_sources_and_prefixes(&[
         "<?php new C()->method(); new C()->property; new C()?->property;",
+        "<?php new static()->method(); new static::$class()->method();",
         "<?php new C()[0]; new C()(); new C()::X; new C()::$property;",
         "<?php new $class(1)->method(); new ($factory())()->property;",
         "<?php new $classes[0]()->method(); new $factory->className()->method();",
