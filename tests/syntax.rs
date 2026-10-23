@@ -1,8 +1,8 @@
 use phprs::{
     PhpParser,
     contracts::{
-        DEFAULT_LIMITS, DEFAULT_OPTIONS, ErrorKind, ParseOptions, SyntaxKind, SyntaxParser,
-        SyntaxTree,
+        DEFAULT_LIMITS, DEFAULT_OPTIONS, ErrorKind, ParseOptions, SyntaxKind, SyntaxNode,
+        SyntaxParser, SyntaxTree,
     },
 };
 
@@ -83,13 +83,27 @@ fn verify_tree(tree: &SyntaxTree<'_>) {
         tree.nodes[tree.root]
     );
     assert_eq!(tree.nodes[tree.root].span, 0..tree.source.len());
+    let mut parents = vec![0; tree.nodes.len()];
     for (index, node) in tree.nodes.iter().enumerate() {
         assert!(node.span.start <= node.span.end, "{node:?}");
         assert!(node.span.end <= tree.source.len());
         for &child in &tree.edges[node.children.clone()] {
             assert!(child < index);
+            parents[child] += 1;
+            let span = &tree.nodes[child].span;
+            assert!(
+                node.span.start <= span.start && span.end <= node.span.end,
+                "parent {node:?}, child {:?}",
+                tree.nodes[child]
+            );
         }
     }
+    parents[tree.root] += 1;
+    assert!(
+        parents.iter().all(|&count| count == 1),
+        "unowned or multiply owned tree nodes: {parents:?}"
+    );
+    assert_eq!(tree.edges.len(), tree.nodes.len() - 1);
 }
 
 #[test]
@@ -375,24 +389,41 @@ fn lexer_edge_cases_phprs_017() {
 fn tree_conservation_and_spans_phprs_019() {
     for &(_, source) in VALID {
         let tree = PhpParser.parse(source, DEFAULT_OPTIONS).unwrap();
-        let mut parents = vec![0; tree.nodes.len()];
-        for node in &tree.nodes {
-            for &child in &tree.edges[node.children.clone()] {
-                parents[child] += 1;
-                let span = &tree.nodes[child].span;
-                assert!(
-                    node.span.start <= span.start && span.end <= node.span.end,
-                    "parent {node:?}, child {:?}",
-                    tree.nodes[child]
-                );
-            }
-        }
-        parents[tree.root] += 1;
-        assert!(
-            parents.iter().all(|&count| count == 1),
-            "unowned or multiply owned tree nodes: {parents:?}"
-        );
+        verify_tree(&tree);
     }
+}
+
+#[test]
+#[should_panic(expected = "unowned or multiply owned tree nodes")]
+fn tree_checker_rejects_orphans_phprs_042() {
+    let mut tree = PhpParser.parse(b"<?php echo 1;", DEFAULT_OPTIONS).unwrap();
+    tree.nodes.push(SyntaxNode {
+        kind: SyntaxKind::Rule("unowned"),
+        span: 0..0,
+        children: 0..0,
+    });
+    verify_tree(&tree);
+}
+
+#[test]
+#[should_panic(expected = "parent")]
+fn tree_checker_rejects_escaping_spans_phprs_042() {
+    let mut tree = PhpParser.parse(b"<?php echo 1;", DEFAULT_OPTIONS).unwrap();
+    let token = tree
+        .nodes
+        .iter()
+        .position(|node| node.kind == SyntaxKind::Token("T_LNUMBER"))
+        .unwrap();
+    tree.nodes[token].span = 0..tree.source.len();
+    verify_tree(&tree);
+}
+
+#[test]
+#[should_panic(expected = "assertion `left == right` failed")]
+fn tree_checker_rejects_unused_edges_phprs_042() {
+    let mut tree = PhpParser.parse(b"<?php echo 1;", DEFAULT_OPTIONS).unwrap();
+    tree.edges.push(0);
+    verify_tree(&tree);
 }
 
 #[test]

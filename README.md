@@ -68,7 +68,10 @@ background work. On success the tree moves to the caller; temporary workspaces
 are dropped. On rejection or allocation failure all invocation-owned vectors
 are dropped. The CLI owns the file and source buffer for the call. Flat storage
 avoids recursive destruction on deeply nested input. Tests cover tree ownership,
-stack limits, malformed bytes, truncation and out-of-order heredoc closure;
+stack limits, malformed bytes, truncation and out-of-order heredoc closure.
+Every successful generated/truncated parse is checked for parent/span
+conservation; deliberate orphan, escaping-span and unused-edge controls exercise
+that checker;
 these bounded checks do not prove unrestricted resource safety.
 
 ## Offline verification
@@ -91,7 +94,7 @@ in order. The differential tests use local PHP's `token_get_all` with
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 33 Rust tests and 17 Python tests, including
+Verification on 2026-10-23 passes 36 Rust tests and 17 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 PHP acceptance comparisons and deterministic generation of 1,121 states and
 586 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
