@@ -6,6 +6,16 @@
   full PHP syntax support; execution and all other runtime work come later.
 - The long-term goal is a production replacement for PHP. Do not introduce
   infrastructure or language features solely for a later milestone.
+- Owner rule (2026-10-23): implement phprs independently from language
+  specifications and observable behavior. Do not copy or translate PHP engine
+  code, extract its grammar, or derive parser tables from PHP implementation
+  sources. Previously derived artifacts must be replaced, not extended or kept
+  as a fallback. This is an independent implementation requirement; prior source
+  exposure means strict clean-room separation must not be claimed.
+- Safety and performance are acceptance goals, not assumptions. Preserve bounded
+  resources, explicit ownership and permanent fault/invalid-input regressions;
+  support any speed or memory advantage with reproducible measurements over
+  stated workloads and equivalent operations.
 - Owner rule (2026-10-23, persistent for phprs): target PHP 8.x.x. Do not retain
   compatibility-only shims, deprecated aliases, legacy APIs/configuration/formats,
   migrations, wrappers or fallback paths. Update current callers, contracts,

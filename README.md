@@ -6,6 +6,12 @@ The working tree implements a byte-oriented lexer, a parser derived from the
 PHP 8.5.0 grammar,
 and a syntax-checking CLI. Execution remains deferred.
 
+The current grammar tables were derived from PHP implementation source. That
+approach is superseded by the owner's independent-implementation requirement
+(PHPRS-090). They must be replaced with an independently authored language
+contract based only on specifications and observable behavior; no clean-room
+separation is claimed. Safety and speed remain measured acceptance goals.
+
 ## Check a file
 
 ```sh
