@@ -33,8 +33,8 @@ or runtime compatibility. Tests cover representative language families and a
 bounded invalid-input corpus; they do not establish equivalence for all inputs.
 PHP 8.x.x is the target family, with PHP 8.5.0 as the single syntax baseline.
 The table integration is implemented; scanner extensions remain in progress
-for void casts and property comments. Asymmetric visibility is implemented
-and covered by exact-token and malformed-boundary tests. The local PHP
+for property comments. Asymmetric visibility and void casts are implemented
+and covered by exact-token, position and malformed-boundary tests. The local PHP
 8.3.6 oracle validates shared syntax only. New PHP 8.5 fixtures are specified
 against the pinned grammar; native 8.5 comparison remains outstanding.
 Production acceptance versions and application coverage remain undecided.
@@ -102,7 +102,7 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 43 Rust tests and 17 Python tests, including
+Verification on 2026-10-23 passes 45 Rust tests and 17 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP acceptance comparisons and deterministic generation of
 1,193 states and 624 rules. Fresh LLVM counters meet 80 percent executable-line coverage for

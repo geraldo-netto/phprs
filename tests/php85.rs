@@ -77,3 +77,49 @@ fn asymmetric_visibility_boundaries_phprs_045() {
         common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
     }
 }
+
+#[test]
+fn void_cast_positions_phprs_046() {
+    for source in [
+        "<?php (void) f();",
+        "<?php ( VoId\t) $x + f();",
+        "<?php for ((void) start(); $ready; (void) step()) {}",
+        "<?php for ((void) start(), 1; (void) check(), $ready; (void) step(), (void) finish()) {}",
+        "<?php if ($ready) (void) work();",
+    ] {
+        let tree = PhpParser
+            .parse(source.as_bytes(), DEFAULT_OPTIONS)
+            .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+        common::verify_tree(&tree);
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|node| node.kind == SyntaxKind::Token("T_VOID_CAST"))
+        );
+    }
+}
+
+#[test]
+fn void_cast_invalid_values_phprs_046() {
+    for source in [
+        "<?php echo (void) f();",
+        "<?php $x = (void) f();",
+        "<?php return (void) f();",
+        "<?php $f = fn() => (void) f();",
+        "<?php if ((void) f()) {}",
+        "<?php for (; (void) f(); ) {}",
+        "<?php for (; $ready, (void) f(); ) {}",
+        "<?php f((void) g());",
+        "<?php (void) (void) f();",
+        "<?php (void);",
+        "<?php (\nvoid) f();",
+        "<?php (void\r) f();",
+        "<?php (vo id) f();",
+        "<?php (void\0) f();",
+    ] {
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

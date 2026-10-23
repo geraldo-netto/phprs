@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-046 | open | Parse void casts in admitted statement positions | PHPRS-044 | Scan (void) with PHP's tab/space rules; test statement and for-initializer/increment forms, rejecting expression/condition uses and malformed casts. |
 | PHPRS-047 | open | Verify pipe expressions and precedence | PHPRS-044 | Permanent positive/negative fixtures cover chained pipes, callable operands, precedence and malformed boundaries with source-spanned trees. |
 | PHPRS-054 | open | Verify clone and exit callable forms | PHPRS-044 | Cover named/unpacked/trailing/first-class argument forms and clone's parenthesis ambiguity; reject malformed argument lists without executing input. |
 | PHPRS-055 | open | Verify direct new-expression dereferencing | PHPRS-044 | Cover calls, property/nullsafe access, offsets and dynamic/anonymous construction; reject bare-new forms excluded by the grammar. |

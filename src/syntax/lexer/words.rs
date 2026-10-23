@@ -204,6 +204,7 @@ fn cast_kind(word: &[u8]) -> Option<u16> {
         (b"bool", T_BOOL_CAST),
         (b"boolean", T_BOOL_CAST),
         (b"unset", T_UNSET_CAST),
+        (b"void", T_VOID_CAST),
     ];
     casts
         .iter()
