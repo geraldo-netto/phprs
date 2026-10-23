@@ -1,5 +1,13 @@
 # TODO
 
+Resume checkpoint (2026-10-23): owner requested saving for shutdown. All parser
+changes are committed locally; no push. Latest verification: 87 Rust tests,
+20 Python tests, per-function coverage, Clippy and reproducible tables pass.
+Next implementation item: PHPRS-115; add the permanent failing regression first.
+Official language docs remain cached in `target/php-manual` (198,085 transferred
+bytes within the authorized 1 MB). Native PHP 8.5 comparison stays deferred;
+SonarQube measurement is still unavailable.
+
 ## Delivery and compatibility
 
 | id | status | feature | dependencies | completion condition |
@@ -10,10 +18,9 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-114 | open | Admit late-static scoped access | PHP 8 language contract; local token-parse observations | The grammar lacks `static::method()`, `static::$property` and `static::CONSTANT`. Add scoped constant/property/dynamic/call forms without admitting bare static expressions, with permanent failing-before/passing-after regressions. |
-| PHPRS-115 | open | Admit readonly function identifiers | PHP 8 language contract; local token-parse observations | The grammar rejects function declarations/calls named readonly, although native parsing admits this contextual identifier. Preserve readonly modifiers and reject forbidden class/constant placements; retain failing-before/passing-after tests. |
+| PHPRS-115 | open | Admit readonly function identifiers | PHP 8 language contract; local token-parse observations | Local PHP token parsing admits `function readonly(){}`, `readonly(...)` and `readonly(1)->p`, but phprs rejects them. Native parsing rejects bare `readonly;`, class/constant names and `use function readonly;`. Preserve readonly modifiers and these placement boundaries; retain failing-before/passing-after tests. |
 | PHPRS-053 | deferred | Compare syntax with a native PHP 8.5 oracle | Owner instruction 2026-10-23: skip native 8.5 validation and continue implementation | Native PHP 8.5 comparison is explicitly deferred; only PHP 8.3.6 is installed. Revisit only on owner resumption with an available executable or explicit transfer authorization. Do not claim native 8.5 equivalence. |
-| PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-090, PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. Execution remains deferred. |
+| PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-090, PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057, PHPRS-115 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. Execution remains deferred. |
 
 ## Execution and values
 

@@ -24,8 +24,8 @@ python3 tools/generate_parser.py --check
 
 Omit `--check` to intentionally regenerate. Temporary files and subprocesses belong
 to the synchronous generator invocation; its temporary-directory context removes
-artifacts on success or failure. Verification on 2026-10-23 reproduces 1,113 states
-and 634 rules using GNU Bison 3.8.2, Python 3.12.3 and rustfmt 1.9.0-stable from
+artifacts on success or failure. Verification on 2026-10-23 reproduces 1,119 states
+and 637 rules using GNU Bison 3.8.2, Python 3.12.3 and rustfmt 1.9.0-stable from
 Rust 1.98.1. Other versions have not been checked for byte-identical output.
 
 The installed PHP executable is 8.3.6 and can compare shared syntax only.

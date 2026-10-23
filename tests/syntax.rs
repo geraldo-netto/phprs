@@ -1098,3 +1098,30 @@ fn source_tag_trivia_traces_phprs_112() {
         }
     }
 }
+
+#[test]
+fn late_static_access_phprs_114() {
+    for (expression, accepted) in [
+        ("static::method()", true),
+        ("static::method(...)", true),
+        ("static::$property", true),
+        ("static::$property=1", true),
+        ("static::$property()", true),
+        ("static::CONSTANT", true),
+        ("static::class", true),
+        ("static::{$name}()", true),
+        ("static::$class::method()", true),
+        ("static", false),
+        ("static->property", false),
+        ("static::", false),
+        ("static::X=1", false),
+    ] {
+        let source = format!("<?php {expression};");
+        assert_eq!(php_accepts(source.as_bytes()), accepted, "{source}");
+        let result = PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS);
+        assert_eq!(result.is_ok(), accepted, "{source}");
+        if result.is_ok() {
+            assert_token_trace(source.as_bytes());
+        }
+    }
+}

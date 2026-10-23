@@ -424,6 +424,8 @@ postfix:
   | place
   | postfix T_DOUBLE_COLON member_identifier
   | postfix T_DOUBLE_COLON '{' expression '}'
+  | T_STATIC T_DOUBLE_COLON member_identifier
+  | T_STATIC T_DOUBLE_COLON '{' expression '}'
 ;
 place:
     variable
@@ -432,6 +434,7 @@ place:
   | postfix '[' expression_opt ']'
   | postfix T_OBJECT_OPERATOR property_selector
   | postfix T_DOUBLE_COLON variable
+  | T_STATIC T_DOUBLE_COLON variable
 ;
 property_selector:
     T_STRING | variable | '{' expression '}'
