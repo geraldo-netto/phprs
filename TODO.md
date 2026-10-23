@@ -1,12 +1,8 @@
 # TODO
 
-Resume checkpoint (2026-10-23): owner requested saving for shutdown. All parser
-changes are committed locally; no push. Latest verification: 87 Rust tests,
-20 Python tests, per-function coverage, Clippy and reproducible tables pass.
-Next implementation item: PHPRS-115; add the permanent failing regression first.
-Official language docs remain cached in `target/php-manual` (198,085 transferred
-bytes within the authorized 1 MB). Native PHP 8.5 comparison stays deferred;
-SonarQube measurement is still unavailable.
+Current scope (owner instruction 2026-10-23): make the hello world example run;
+skip other work. The unfinished syntax gate does not block this narrow delivery.
+Native PHP 8.5 comparison stays deferred; SonarQube measurement is unavailable.
 
 ## Delivery and compatibility
 
@@ -20,13 +16,12 @@ SonarQube measurement is still unavailable.
 |---|---|---|---|---|
 | PHPRS-115 | open | Admit readonly function identifiers | PHP 8 language contract; local token-parse observations | Local PHP token parsing admits `function readonly(){}`, `readonly(...)` and `readonly(1)->p`, but phprs rejects them. Native parsing rejects bare `readonly;`, class/constant names and `use function readonly;`. Preserve readonly modifiers and these placement boundaries; retain failing-before/passing-after tests. |
 | PHPRS-053 | deferred | Compare syntax with a native PHP 8.5 oracle | Owner instruction 2026-10-23: skip native 8.5 validation and continue implementation | Native PHP 8.5 comparison is explicitly deferred; only PHP 8.3.6 is installed. Revisit only on owner resumption with an available executable or explicit transfer authorization. Do not claim native 8.5 equivalence. |
-| PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-090, PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057, PHPRS-115 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. Execution remains deferred. |
+| PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-090, PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057, PHPRS-115 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. The owner selected hello world independently of this unfinished gate; broader runtime work stays deferred. |
 
 ## Execution and values
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-020 | deferred | Evaluate one echo statement | After syntax delivery; execution is explicitly deferred | Produce the exact contracted output bytes independently of parser and OS internals; enforce output bounds and test output failure handling at the host boundary. |
 | PHPRS-021 | deferred | Add scalar values, variables, and expressions | Revisit after PHPRS-030 | Select a small program, define evaluation order and coercions against the chosen PHP profile, and pass permanent semantic and invalid-input tests. |
 | PHPRS-022 | deferred | Add arrays, references, and managed resources | After PHPRS-021; activate only when a selected example requires them | Define ownership, copy-on-write and aliasing behavior, cycle handling, destructor order, rooting, cleanup, and identity reuse; validate bounded models and runtime regressions before use. |
 
@@ -34,16 +29,14 @@ SonarQube measurement is still unavailable.
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-025 | deferred | Run a source file and report failures | After syntax delivery and PHPRS-020 | The planned execution command in README.md reads one file and writes exact stdout bytes; missing arguments, unreadable files, invalid programs, and output failures produce stderr diagnostics and nonzero exit status. |
 | PHPRS-026 | deferred | Add PHP CLI options and configuration | Revisit after PHPRS-030 | Implement only the options required by the next selected programs, with explicit configuration precedence and platform-independent contracts. |
 
 ## Tests and delivery evidence
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-030 | deferred | Verify the hello world delivery | After syntax delivery and PHPRS-025 | Permanent automated tests run the file from README.md and assert exact stdout, empty stderr, and exit zero; rejection, file, and output-error tests pass offline. Mark hello world implemented only after these checks pass. |
-| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (184 Rust function/closure groups and 20 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
-| PHPRS-035 | blocked | Measure SonarQube complexity per function | SonarQube Rust/Python analysis tooling is not installed locally | Produce SonarQube complexity values at most 9 for every new/changed production, test and tooling function, including heredoc_close_preserves_active_identity_phprs_034; record analyzer/tool versions and refactor any violations. Requires locally available supported analysis tooling or explicit owner authorization for necessary transfers; estimates and Clippy are not substitutes. |
+| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (198 Rust function/closure groups and 20 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
+| PHPRS-035 | blocked | Measure SonarQube complexity per function | SonarQube Rust/Python analysis tooling is not installed locally | Produce SonarQube complexity values at most 9 for every new/changed production, test and tooling function, including heredoc_close_preserves_active_identity_phprs_034 and the hello world executor/CLI/tests; record analyzer/tool versions and refactor any violations. Requires locally available supported analysis tooling or explicit owner authorization for necessary transfers; estimates and Clippy are not substitutes. |
 
 ## Control flow and callable code
 

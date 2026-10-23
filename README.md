@@ -1,10 +1,12 @@
 # phprs
 
 A PHP implementation in Rust, with a long-term goal of becoming a production
-replacement for PHP, targeting PHP 8.x.x. The current stage is PHP syntax support.
+replacement for PHP, targeting PHP 8.x.x. The selected delivery is hello world
+execution; the broader syntax delivery gate remains unfinished.
 The working tree implements a byte-oriented lexer, an independently authored
-PHP 8.5 syntax grammar, a Rust parser and a syntax-checking CLI. Execution remains
-deferred. Language rules come from specifications and observable behavior;
+PHP 8.5 syntax grammar, a Rust parser, a syntax-checking CLI and execution of one
+echo statement containing a quoted string. Other runtime work remains deferred.
+Language rules come from specifications and observable behavior;
 PHP implementation sources and PHP-derived grammar extraction have been removed.
 Prior source exposure is disclosed; strict clean-room separation is not claimed.
 Safety and speed remain measured acceptance goals.
@@ -13,17 +15,35 @@ Safety and speed remain measured acceptance goals.
 `grammar/vocabulary.json` records language-level token classes and spellings
 from documentation and public tokenization observations, without PHP token IDs.
 
-## Check a file
+## Run hello world
 
 ```sh
-cargo run --offline -- --check examples/hello.php
+cargo run --offline -- examples/hello.php
 ```
 
-For the checked-in example:
+The checked-in example:
 
 ```php
 <?php
 echo "Hello, world!\n";
+```
+
+prints exactly `Hello, world!` followed by a newline, with empty program stderr
+and exit zero. Cargo may print its own build/status messages; use `cargo run
+--offline --quiet -- examples/hello.php` to suppress them.
+
+Execution accepts exactly one echo of a single- or double-quoted string, including
+binary prefixes, comments and simple double-quote escapes (`\n`, `\r`, `\t`,
+`\v`, `\e`, `\f`, `\\`, `\$`, `\"`). Single quotes decode only `\\` and `\'`;
+unknown escapes retain their backslash. Double-quote octal, hexadecimal and
+Unicode escapes, interpolation, expressions and additional statements return an
+unsupported-execution diagnostic. The command never invokes PHP to execute a
+program. File/read, syntax, limit and output write/flush failures return status 1.
+
+## Check a file
+
+```sh
+cargo run --offline -- --check examples/hello.php
 ```
 
 The checker prints exactly `Syntax OK` followed by a newline, leaves stderr
@@ -56,6 +76,11 @@ implementation and connects host arguments and output streams. Callers use the
 interface directly.
 Contract tests use an independent implementation, and CLI fault tests inject a
 parser without depending on generated grammar tables.
+`src/execution_contracts.rs` separately defines `SourceExecutor`, its options,
+output limit and ownership contract. `EchoExecutor` depends on `SyntaxParser`;
+its adapter selects the supported tokens using language names and source spans,
+without depending on generated parser identities or node storage order. The CLI
+depends on both interfaces; `main` wires their implementations.
 The tree borrows the source and owns flat node/edge vectors; it cannot outlive
 that source. Every non-root node has one parent; child spans lie within parent
 spans. EOF is excluded from tree storage. Trivia is retained in source bytes,
@@ -89,6 +114,18 @@ Every successful generated/truncated parse is checked for parent/span
 conservation; deliberate orphan, escaping-span and unused-edge controls exercise
 that checker. These bounded checks do not prove unrestricted resource safety.
 
+Each execution call owns its syntax tree and output buffer and borrows the source
+only until returning. Decoding never expands the string body: it reserves at most
+the smaller of its byte length and the output limit, and checks the limit before
+every append. On success the output transfers to the caller; on rejection or
+partial failure both the buffer and tree drop synchronously. Nothing is queued or
+retained, and no callback, identity reuse or cancellation state exists. The CLI
+sets the output limit to 1,048,576 bytes, writes only after evaluation succeeds,
+and checks both writes and flush. A host write failure can leave partial stdout;
+the process still reports failure. Tests cover all 256 literal byte values,
+truncation, unsupported programs, allocation and output limits, source/output
+lifetime independence and injected host failures.
+
 ## Offline verification
 
 Builds use one Rust package with no third-party dependencies. With the installed
@@ -110,7 +147,7 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 87 Rust tests and 20 Python tests, including
+Verification on 2026-10-23 passes 101 Rust tests and 20 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP token-class/span and acceptance comparisons and deterministic generation of
 1,119 states and 637 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
@@ -121,9 +158,7 @@ is claimed. Native CLI validation has been performed on Linux only.
 
 ## Later deliveries
 
-Execution starts with the hello world example only after syntax delivery. Its
-planned command is `cargo run --offline -- examples/hello.php`, with exact output
-`Hello, world!` followed by a newline, empty stderr and exit zero. That execution
-command is not implemented. Values, extensions, hosting and production release
-criteria remain deliberately deferred in the feature tables in
+The owner selected hello world ahead of full syntax sign-off. Values,
+extensions, hosting and production release criteria remain deliberately deferred
+in the feature tables in
 [TODO.md](TODO.md).

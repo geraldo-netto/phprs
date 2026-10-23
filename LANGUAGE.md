@@ -28,11 +28,31 @@ Documentation consulted on 2026-10-23:
 - [Attribute syntax](https://www.php.net/manual/en/language.attributes.syntax.php)
 - [Expressions](https://www.php.net/manual/en/language.expressions.php)
 
-Only syntax is implemented at this stage. Do not execute source, resolve names,
-evaluate constants, infer types or provide runtime/extension behavior. Keep
+The syntax parser does not execute source, resolve names, evaluate constants,
+infer types or provide runtime/extension behavior. A separate executor implements
+the selected hello world subset below. Keep
 syntax rejection distinct from compiler checks requiring declaration or value
 information. A declared PHP 8.5 target does not establish native acceptance:
 only PHP 8.3.6 is installed, and it can compare shared syntax only.
+
+## Selected execution contract
+
+Owner instruction (2026-10-23) activates hello world before syntax sign-off.
+Execute exactly one echo statement with one quoted, non-interpolated string.
+Use the syntax parser for source admission; reject other valid PHP programs as
+unsupported execution before exposing output. Preserve literal bytes, including
+NUL and high bytes. Single quotes interpret only escaped backslash and quote.
+Double quotes interpret `\n`, `\r`, `\t`, `\v`, `\e`, `\f`, `\\`, `\$` and `\"`;
+unknown escapes preserve the backslash. Octal, hexadecimal and Unicode escapes in
+double quotes remain unsupported. Binary string prefixes do not change bytes.
+Lexer source handling, including echo tags and file-mode shebang handling, applies.
+
+The independent SourceExecutor contract returns owned output bounded by its
+explicit byte limit and retains no invocation resources or source references.
+Failure returns a diagnostic and no output. The native CLI owns file reads,
+stdout writes and flush, diagnostic rendering and process status. The checked-in
+example must produce exactly `Hello, world!` and LF, empty stderr and exit zero.
+Other runtime features remain deferred.
 
 ## Vocabulary and source handling
 

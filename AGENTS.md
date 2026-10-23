@@ -2,8 +2,9 @@
 
 ## Delivery scope
 
-- Seek the smallest independently verifiable delivery. The current stage is
-  full PHP syntax support; execution and all other runtime work come later.
+- Seek the smallest independently verifiable delivery. Owner instruction
+  (2026-10-23): deliver hello world execution now, without finishing the syntax
+  gate first. All other runtime work remains deferred.
 - The long-term goal is a production replacement for PHP. Do not introduce
   infrastructure or language features solely for a later milestone.
 - Owner rule (2026-10-23): implement phprs independently from language

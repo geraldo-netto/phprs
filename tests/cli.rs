@@ -1,4 +1,15 @@
 #[test]
+fn binary_runs_hello_world_phprs_030() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))
+        .arg("examples/hello.php")
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(0));
+    assert_eq!(output.stdout, b"Hello, world!\n");
+    assert!(output.stderr.is_empty());
+}
+
+#[test]
 fn binary_checks_without_execution_phprs_018() {
     let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))
         .args(["--check", "examples/hello.php"])

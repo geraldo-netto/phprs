@@ -1,8 +1,10 @@
 mod cli;
 
 fn main() -> std::process::ExitCode {
+    let parser = phprs::PhpParser;
     let status = cli::run(
-        &phprs::PhpParser,
+        &parser,
+        &phprs::EchoExecutor { parser: &parser },
         std::env::args_os().skip(1),
         &mut std::io::stdout().lock(),
         &mut std::io::stderr().lock(),

@@ -1,16 +1,18 @@
-//! Native file and process adapter. Parsing itself has no host dependencies.
-use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, ParseOptions, SyntaxParser};
+//! Native file and process adapter for syntax checks and the selected execution.
+use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, Diagnostic, ParseOptions, SyntaxParser};
+use phprs::execution_contracts::{ExecutionOptions, SourceExecutor};
 use std::ffi::OsString;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
 pub fn run(
     parser: &dyn SyntaxParser,
+    executor: &dyn SourceExecutor,
     args: impl Iterator<Item = OsString>,
     stdout: &mut impl Write,
     stderr: &mut impl Write,
 ) -> u8 {
-    let result = input_path(args).and_then(|path| check(parser, path, stdout));
+    let result = input_command(args).and_then(|command| process(parser, executor, command, stdout));
     match result {
         Ok(()) => 0,
         Err(message) => {
@@ -20,39 +22,78 @@ pub fn run(
     }
 }
 
-fn input_path(mut args: impl Iterator<Item = OsString>) -> Result<PathBuf, String> {
-    if args.next().as_deref() != Some(std::ffi::OsStr::new("--check")) {
+enum Command {
+    Check(PathBuf),
+    Execute(PathBuf),
+}
+
+fn input_command(mut args: impl Iterator<Item = OsString>) -> Result<Command, String> {
+    let first = args.next().ok_or_else(usage)?;
+    let command = if first == "--check" {
+        Command::Check(PathBuf::from(args.next().ok_or_else(usage)?))
+    } else if first.as_encoded_bytes().starts_with(b"-") {
         return Err(usage());
-    }
-    let path = args.next().ok_or_else(usage)?;
+    } else {
+        Command::Execute(PathBuf::from(first))
+    };
     if args.next().is_some() {
         return Err(usage());
     }
-    Ok(PathBuf::from(path))
+    Ok(command)
 }
 
 fn usage() -> String {
-    "usage: phprs --check <file.php>".into()
+    "usage: phprs [--check] <file.php>".into()
 }
 
-fn check(parser: &dyn SyntaxParser, path: PathBuf, stdout: &mut impl Write) -> Result<(), String> {
-    let file =
-        std::fs::File::open(&path).map_err(|error| format!("{}: {error}", path.display()))?;
+fn process(
+    parser: &dyn SyntaxParser,
+    executor: &dyn SourceExecutor,
+    command: Command,
+    stdout: &mut impl Write,
+) -> Result<(), String> {
+    let path = match &command {
+        Command::Check(path) | Command::Execute(path) => path,
+    };
+    let file = std::fs::File::open(path).map_err(|error| format!("{}: {error}", path.display()))?;
     let source = read_source(file)?;
     let options = ParseOptions {
         skip_shebang: true,
         ..DEFAULT_OPTIONS
     };
-    parser.parse(&source, options).map_err(|error| {
-        format!(
-            "{}: byte {}: {} ({:?})",
-            path.display(),
-            error.span.start,
-            error.message,
-            error.kind
-        )
-    })?;
-    writeln!(stdout, "Syntax OK").map_err(|error| format!("stdout: {error}"))
+    let result = match command {
+        Command::Check(_) => {
+            parser
+                .parse(&source, options)
+                .map_err(|error| diagnostic(path, error))?;
+            stdout.write_all(b"Syntax OK\n")
+        }
+        Command::Execute(_) => {
+            let output = executor
+                .execute(
+                    &source,
+                    ExecutionOptions {
+                        parse: options,
+                        output_bytes: DEFAULT_LIMITS.source_bytes,
+                    },
+                )
+                .map_err(|error| diagnostic(path, error))?;
+            stdout.write_all(&output)
+        }
+    };
+    result
+        .and_then(|()| stdout.flush())
+        .map_err(|error| format!("stdout: {error}"))
+}
+
+fn diagnostic(path: &std::path::Path, error: Diagnostic) -> String {
+    format!(
+        "{}: byte {}: {} ({:?})",
+        path.display(),
+        error.span.start,
+        error.message,
+        error.kind
+    )
 }
 
 fn read_source(file: impl Read) -> Result<Vec<u8>, String> {
@@ -77,6 +118,21 @@ mod tests {
     use super::*;
     use phprs::PhpParser;
     use phprs::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxTree};
+
+    fn run(
+        parser: &dyn SyntaxParser,
+        args: impl Iterator<Item = OsString>,
+        stdout: &mut impl Write,
+        stderr: &mut impl Write,
+    ) -> u8 {
+        super::run(
+            parser,
+            &phprs::EchoExecutor { parser },
+            args,
+            stdout,
+            stderr,
+        )
+    }
 
     struct InjectedFailure;
 
@@ -139,9 +195,10 @@ mod tests {
     fn cli_arguments_phprs_018() {
         for args in [
             vec![],
-            vec!["file.php"],
+            vec!["--unknown"],
             vec!["--check"],
             vec!["--check", "a", "b"],
+            vec!["a", "b"],
         ] {
             let mut stderr = Vec::new();
             assert_eq!(
@@ -219,5 +276,95 @@ mod tests {
             PhpParser.parse(&source, DEFAULT_OPTIONS).unwrap_err().kind,
             phprs::contracts::ErrorKind::Limit
         );
+    }
+
+    struct FlushFailure;
+
+    impl Write for FlushFailure {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Err(std::io::Error::other("injected flush failure"))
+        }
+    }
+
+    #[test]
+    fn cli_execution_flush_failure_phprs_025() {
+        let mut stderr = Vec::new();
+        assert_eq!(
+            run(
+                &PhpParser,
+                [OsString::from("examples/hello.php")].into_iter(),
+                &mut FlushFailure,
+                &mut stderr,
+            ),
+            1
+        );
+        assert_eq!(stderr, b"phprs: stdout: injected flush failure\n");
+    }
+
+    #[test]
+    fn cli_execution_file_and_syntax_errors_phprs_025() {
+        for path in ["tests/fixtures/missing.php", "tests/fixtures/invalid.php"] {
+            let mut stdout = Vec::new();
+            let mut stderr = Vec::new();
+            assert_eq!(
+                run(
+                    &PhpParser,
+                    [OsString::from(path)].into_iter(),
+                    &mut stdout,
+                    &mut stderr
+                ),
+                1
+            );
+            assert!(stdout.is_empty());
+            assert!(stderr.starts_with(b"phprs:"));
+        }
+    }
+
+    #[test]
+    fn cli_execution_write_failure_phprs_025() {
+        let mut stderr = Vec::new();
+        assert_eq!(
+            run(
+                &PhpParser,
+                [OsString::from("examples/hello.php")].into_iter(),
+                &mut Broken,
+                &mut stderr
+            ),
+            1
+        );
+        assert_eq!(stderr, b"phprs: stdout: injected write failure\n");
+    }
+
+    struct InjectedExecutor;
+
+    impl SourceExecutor for InjectedExecutor {
+        fn execute(&self, source: &[u8], options: ExecutionOptions) -> Result<Vec<u8>, Diagnostic> {
+            assert_eq!(source, include_bytes!("../examples/hello.php"));
+            assert!(options.parse.skip_shebang);
+            assert_eq!(options.output_bytes, DEFAULT_LIMITS.source_bytes);
+            Ok(vec![0, 255])
+        }
+    }
+
+    #[test]
+    fn cli_uses_execution_interface_phprs_025() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        assert_eq!(
+            super::run(
+                &InjectedFailure,
+                &InjectedExecutor,
+                [OsString::from("examples/hello.php")].into_iter(),
+                &mut stdout,
+                &mut stderr
+            ),
+            0
+        );
+        assert_eq!(stdout, [0, 255]);
+        assert!(stderr.is_empty());
     }
 }

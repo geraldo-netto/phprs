@@ -67,6 +67,7 @@ pub enum ErrorKind {
     Lexical,
     Limit,
     Allocation,
+    Unsupported,
 }
 
 #[derive(Debug, PartialEq, Eq)]
