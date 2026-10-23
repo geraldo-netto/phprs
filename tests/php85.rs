@@ -366,3 +366,36 @@ fn construction_boundaries_phprs_055() {
         );
     }
 }
+
+#[test]
+fn attributed_constants_phprs_056() {
+    verify_sources_and_prefixes(&[
+        "<?php #[A] const X = 1;",
+        "<?php #[A(1), B(name: 'x'),] #[\\C] const X = 1, Y = 2;",
+        "<?php namespace N; #[A] const X = (int) 1.2;",
+        "<?php namespace N { #[A] const X = 1; } namespace { #[B] const Y = 2; }",
+        "<?php #[A] const X = static fn() => 1;",
+        "<?php class C { #[A] public const int X = 1, Y = 2; }",
+    ]);
+}
+
+#[test]
+fn attributed_constant_boundaries_phprs_056() {
+    for source in [
+        "<?php #[A] const;",
+        "<?php #[A] const X;",
+        "<?php #[A] const X =;",
+        "<?php #[A] const X = 1,;",
+        "<?php const #[A] X = 1;",
+        "<?php #[A] const X = 1, #[B] Y = 2;",
+        "<?php #[A] define('X', 1);",
+        "<?php #[A] echo 1;",
+        "<?php #[A const X = 1;",
+        "<?php #[] const X = 1;",
+    ] {
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

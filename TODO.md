@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-056 | open | Verify attributed global constants | PHPRS-090 | Cover attribute groups, lists and namespace scopes on global constants; reject invalid attribute placement and incomplete declarations. |
 | PHPRS-049 | open | Verify property-hook syntax and __PROPERTY__ | PHPRS-090, PHPRS-045 | Cover block/arrow/abstract and attributed hooks, references, parameter lists and promoted hooks; distinguish grammar acceptance from compile-time restrictions and retain malformed/truncation tests. |
 | PHPRS-052 | open | Audit lexical behavior against independent contracts | PHPRS-092 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |
 | PHPRS-101 | open | Validate modifier applicability by declaration kind | PHPRS-057 | Define admitted modifier classes for methods, constants, properties, promoted parameters and hooks from documentation/behavior; reject misplaced readonly/set/static forms, with separate native-8.5 evidence where unavailable. |
