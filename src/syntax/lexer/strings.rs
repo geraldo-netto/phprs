@@ -441,7 +441,7 @@ fn finish_unicode_escape(start: usize, end: usize) -> Result<usize, Diagnostic> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::contracts::DEFAULT_OPTIONS;
+    use crate::contracts::{DEFAULT_OPTIONS, SyntaxParser};
 
     #[test]
     fn heredoc_close_preserves_active_identity_phprs_034() {
@@ -467,6 +467,6 @@ mod tests {
         while lexer.next().unwrap().id != 0 {}
         assert!(lexer.heredocs.is_empty());
         assert!(lexer.frames.is_empty());
-        assert!(crate::parse(source, DEFAULT_OPTIONS).is_ok());
+        assert!(crate::PhpParser.parse(source, DEFAULT_OPTIONS).is_ok());
     }
 }

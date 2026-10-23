@@ -394,7 +394,7 @@ fn punctuation(byte: u8) -> u16 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::contracts::DEFAULT_OPTIONS;
+    use crate::contracts::{DEFAULT_OPTIONS, SyntaxParser};
 
     #[test]
     fn interpolated_tokens_phprs_016() {
@@ -409,7 +409,10 @@ mod tests {
                 break;
             }
         }
-        assert!(crate::parse(source, DEFAULT_OPTIONS).is_ok(), "{tokens:?}");
+        assert!(
+            crate::PhpParser.parse(source, DEFAULT_OPTIONS).is_ok(),
+            "{tokens:?}"
+        );
     }
 }
 

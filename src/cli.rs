@@ -1,18 +1,16 @@
 //! Native file and process adapter. Parsing itself has no host dependencies.
-use phprs::{
-    contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS},
-    parse,
-};
+use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, SyntaxParser};
 use std::ffi::OsString;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
 pub fn run(
+    parser: &dyn SyntaxParser,
     args: impl Iterator<Item = OsString>,
     stdout: &mut impl Write,
     stderr: &mut impl Write,
 ) -> u8 {
-    let result = input_path(args).and_then(|path| check(path, stdout));
+    let result = input_path(args).and_then(|path| check(parser, path, stdout));
     match result {
         Ok(()) => 0,
         Err(message) => {
@@ -37,11 +35,11 @@ fn usage() -> String {
     "usage: phprs --check <file.php>".into()
 }
 
-fn check(path: PathBuf, stdout: &mut impl Write) -> Result<(), String> {
+fn check(parser: &dyn SyntaxParser, path: PathBuf, stdout: &mut impl Write) -> Result<(), String> {
     let file =
         std::fs::File::open(&path).map_err(|error| format!("{}: {error}", path.display()))?;
     let source = read_source(file)?;
-    parse(&source, DEFAULT_OPTIONS).map_err(|error| {
+    parser.parse(&source, DEFAULT_OPTIONS).map_err(|error| {
         format!(
             "{}: byte {}: {} ({:?})",
             path.display(),
@@ -73,6 +71,49 @@ fn source_buffer(capacity: usize) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use phprs::PhpParser;
+    use phprs::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxTree};
+
+    struct InjectedFailure;
+
+    impl SyntaxParser for InjectedFailure {
+        fn parse<'source>(
+            &self,
+            source: &'source [u8],
+            options: ParseOptions,
+        ) -> Result<SyntaxTree<'source>, Diagnostic> {
+            assert_eq!(source, include_bytes!("../examples/hello.php"));
+            assert_eq!(options.limits.source_bytes, DEFAULT_LIMITS.source_bytes);
+            assert_eq!(options.limits.tokens, DEFAULT_LIMITS.tokens);
+            assert_eq!(options.limits.nodes, DEFAULT_LIMITS.nodes);
+            assert_eq!(options.limits.stack, DEFAULT_LIMITS.stack);
+            assert!(!options.short_open_tags);
+            Err(Diagnostic {
+                kind: ErrorKind::Allocation,
+                span: 0..0,
+                message: "injected parser allocation failure",
+            })
+        }
+    }
+
+    #[test]
+    fn cli_uses_injected_parser_phprs_037() {
+        let args = [
+            OsString::from("--check"),
+            OsString::from("examples/hello.php"),
+        ];
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        assert_eq!(
+            run(&InjectedFailure, args.into_iter(), &mut stdout, &mut stderr),
+            1
+        );
+        assert!(stdout.is_empty());
+        assert_eq!(
+            stderr,
+            b"phprs: examples/hello.php: byte 0: injected parser allocation failure (Allocation)\n"
+        );
+    }
 
     struct Broken;
     impl Write for Broken {
@@ -100,6 +141,7 @@ mod tests {
             let mut stderr = Vec::new();
             assert_eq!(
                 run(
+                    &PhpParser,
                     args.into_iter().map(OsString::from),
                     &mut Vec::new(),
                     &mut stderr
@@ -115,7 +157,10 @@ mod tests {
         for path in ["tests/fixtures/missing.php", "tests/fixtures/invalid.php"] {
             let args = [OsString::from("--check"), OsString::from(path)];
             let mut stderr = Vec::new();
-            assert_eq!(run(args.into_iter(), &mut Vec::new(), &mut stderr), 1);
+            assert_eq!(
+                run(&PhpParser, args.into_iter(), &mut Vec::new(), &mut stderr),
+                1
+            );
             assert!(stderr.starts_with(b"phprs:"));
         }
     }
@@ -127,9 +172,15 @@ mod tests {
             OsString::from("examples/hello.php"),
         ];
         let mut stderr = Vec::new();
-        assert_eq!(run(args.into_iter(), &mut Broken, &mut stderr), 1);
+        assert_eq!(
+            run(&PhpParser, args.into_iter(), &mut Broken, &mut stderr),
+            1
+        );
         assert!(String::from_utf8(stderr).unwrap().contains("stdout"));
-        assert_eq!(run(std::iter::empty(), &mut Broken, &mut Broken), 1);
+        assert_eq!(
+            run(&PhpParser, std::iter::empty(), &mut Broken, &mut Broken),
+            1
+        );
     }
 
     #[test]
@@ -140,7 +191,10 @@ mod tests {
         ];
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
-        assert_eq!(run(args.into_iter(), &mut stdout, &mut stderr), 0);
+        assert_eq!(
+            run(&PhpParser, args.into_iter(), &mut stdout, &mut stderr),
+            0
+        );
         assert_eq!(stdout, b"Syntax OK\n");
         assert!(stderr.is_empty());
     }
@@ -157,7 +211,7 @@ mod tests {
         let source = read_source(std::io::repeat(b' ')).unwrap();
         assert_eq!(source.len(), DEFAULT_LIMITS.source_bytes + 1);
         assert_eq!(
-            parse(&source, DEFAULT_OPTIONS).unwrap_err().kind,
+            PhpParser.parse(&source, DEFAULT_OPTIONS).unwrap_err().kind,
             phprs::contracts::ErrorKind::Limit
         );
     }

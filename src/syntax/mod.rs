@@ -3,13 +3,22 @@ mod parser;
 mod tables;
 mod token_ids;
 
-use crate::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxTree};
+use crate::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxParser, SyntaxTree};
 
-pub fn parse(source: &[u8], options: ParseOptions) -> Result<SyntaxTree<'_>, Diagnostic> {
-    if source.len() > options.limits.source_bytes {
-        return Err(error(ErrorKind::Limit, 0, "source byte limit exceeded"));
+/// Stateless PHP parser using the checked-in PHP 8.3.6 grammar tables.
+pub struct PhpParser;
+
+impl SyntaxParser for PhpParser {
+    fn parse<'source>(
+        &self,
+        source: &'source [u8],
+        options: ParseOptions,
+    ) -> Result<SyntaxTree<'source>, Diagnostic> {
+        if source.len() > options.limits.source_bytes {
+            return Err(error(ErrorKind::Limit, 0, "source byte limit exceeded"));
+        }
+        parser::Parser::new(source, options)?.run()
     }
-    parser::Parser::new(source, options)?.run()
 }
 
 pub(super) fn error(kind: ErrorKind, offset: usize, message: &'static str) -> Diagnostic {

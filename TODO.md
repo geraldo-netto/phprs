@@ -4,7 +4,8 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-003 | deferred | Select the production compatibility profile | Revisit after PHPRS-030 | Select a pinned PHP version, integer/platform assumptions, representative applications, extensions, and measurable release criteria before expanding production claims. |
+| PHPRS-003 | deferred | Select the PHP 8.x production acceptance profile | Revisit after PHPRS-030 | PHP 8.x.x is the language target; select release acceptance versions within that family, integer/platform assumptions, representative applications, extensions and measurable release criteria before production claims. No compatibility-only shims. |
+| PHPRS-038 | open | Audit PHP 8.x version coverage | Target is PHP 8.x.x; local grammar and oracle cover PHP 8.3.6 | Inventory syntax differences across the target minor releases using local authoritative sources first, implement required grammar/scanner differences with permanent tests, and record acceptance evidence per release. Keep unverified releases explicit; any required source/oracle transfer needs owner authorization. |
 
 ## Syntax and parsing
 

@@ -69,3 +69,20 @@ pub struct Diagnostic {
     pub span: Range<usize>,
     pub message: &'static str,
 }
+
+/// Synchronous PHP syntax parsing, without execution or host I/O.
+///
+/// Each call enforces `options.limits`, including on rejected input. Success
+/// returns a tree satisfying the node/span/parent invariants above; failure
+/// returns a diagnostic whose span is within `source` (EOF spans may be empty).
+/// Source is borrowed only for this call and by its returned tree. Implementors
+/// must retain no source references or invocation resources after returning;
+/// owned result storage transfers to the caller. Parser identity is independent
+/// of source lifetime, and repeated calls must not share invocation state.
+pub trait SyntaxParser {
+    fn parse<'source>(
+        &self,
+        source: &'source [u8],
+        options: ParseOptions,
+    ) -> Result<SyntaxTree<'source>, Diagnostic>;
+}

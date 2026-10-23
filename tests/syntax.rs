@@ -1,6 +1,9 @@
 use phprs::{
-    contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, ErrorKind, ParseOptions, SyntaxKind, SyntaxTree},
-    parse,
+    PhpParser,
+    contracts::{
+        DEFAULT_LIMITS, DEFAULT_OPTIONS, ErrorKind, ParseOptions, SyntaxKind, SyntaxParser,
+        SyntaxTree,
+    },
 };
 
 const VALID: &[(&str, &[u8])] = &[
@@ -93,7 +96,7 @@ fn verify_tree(tree: &SyntaxTree<'_>) {
 fn php83_language_families_phprs_010() {
     let mut failures = Vec::new();
     for &(name, source) in VALID {
-        match parse(source, DEFAULT_OPTIONS) {
+        match PhpParser.parse(source, DEFAULT_OPTIONS) {
             Ok(tree) => verify_tree(&tree),
             Err(error) => failures.push(format!("{name}: {error:?}")),
         }
@@ -105,7 +108,7 @@ fn php83_language_families_phprs_010() {
 fn malformed_syntax_phprs_012() {
     for &source in INVALID {
         assert!(
-            parse(source, DEFAULT_OPTIONS).is_err(),
+            PhpParser.parse(source, DEFAULT_OPTIONS).is_err(),
             "accepted {source:?}"
         );
     }
@@ -117,96 +120,103 @@ fn limits_phprs_002() {
     let mut limits = DEFAULT_LIMITS;
     limits.source_bytes = source.len() - 1;
     assert_eq!(
-        parse(
-            source,
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                source,
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits = DEFAULT_LIMITS;
     limits.tokens = 0;
     assert_eq!(
-        parse(
-            source,
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                source,
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits = DEFAULT_LIMITS;
     limits.nodes = 0;
     assert_eq!(
-        parse(
-            b"",
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                b"",
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits = DEFAULT_LIMITS;
     limits.stack = 0;
     assert_eq!(
-        parse(
-            b"",
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                b"",
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits.stack = 1;
     assert_eq!(
-        parse(
-            source,
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                source,
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits.stack = 3;
     assert_eq!(
-        parse(
-            b"<?php {{{{{{",
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                b"<?php {{{{{{",
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
     limits = DEFAULT_LIMITS;
     limits.source_bytes = source.len();
     verify_tree(
-        &parse(
-            source,
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            },
-        )
-        .unwrap(),
+        &PhpParser
+            .parse(
+                source,
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                },
+            )
+            .unwrap(),
     );
 }
 
@@ -214,7 +224,7 @@ fn limits_phprs_002() {
 fn every_fixture_truncation_is_safe_phprs_032() {
     for &(_, source) in VALID {
         for end in 0..=source.len() {
-            if let Ok(tree) = parse(&source[..end], DEFAULT_OPTIONS) {
+            if let Ok(tree) = PhpParser.parse(&source[..end], DEFAULT_OPTIONS) {
                 verify_tree(&tree);
             }
         }
@@ -231,7 +241,7 @@ fn bounded_byte_inputs_are_safe_phprs_032() {
                 seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
                 source.push((seed >> 32) as u8);
             }
-            if let Ok(tree) = parse(&source, DEFAULT_OPTIONS) {
+            if let Ok(tree) = PhpParser.parse(&source, DEFAULT_OPTIONS) {
                 verify_tree(&tree);
             }
         }
@@ -271,19 +281,27 @@ fn differential_fixtures_phprs_032() {
 
 #[test]
 fn sparse_symbol_numbers_phprs_014() {
-    let tree = parse(b"", DEFAULT_OPTIONS).unwrap();
+    let tree = PhpParser.parse(b"", DEFAULT_OPTIONS).unwrap();
     assert_eq!(tree.nodes[tree.root].kind, SyntaxKind::Rule("start"));
-    assert!(parse(b"<?php function f(){__halt_compiler();}", DEFAULT_OPTIONS).is_err());
+    assert!(
+        PhpParser
+            .parse(b"<?php function f(){__halt_compiler();}", DEFAULT_OPTIONS)
+            .is_err()
+    );
 }
 
 #[test]
 fn compound_ampersand_phprs_015() {
-    assert!(parse(b"<?php $a &= 1;", DEFAULT_OPTIONS).is_ok());
+    assert!(PhpParser.parse(b"<?php $a &= 1;", DEFAULT_OPTIONS).is_ok());
 }
 
 #[test]
 fn nested_string_modes_phprs_016() {
-    assert!(parse(br#"<?php echo "{$o->f("{$x}")}";"#, DEFAULT_OPTIONS).is_ok());
+    assert!(
+        PhpParser
+            .parse(br#"<?php echo "{$o->f("{$x}")}";"#, DEFAULT_OPTIONS)
+            .is_ok()
+    );
 }
 
 #[test]
@@ -345,7 +363,7 @@ fn lexer_edge_cases_phprs_017() {
     for &expression in expressions {
         let source = [b"<?php echo ".as_slice(), expression, b";"].concat();
         let expected = php_accepts(&source);
-        let actual = parse(&source, DEFAULT_OPTIONS).is_ok();
+        let actual = PhpParser.parse(&source, DEFAULT_OPTIONS).is_ok();
         if actual != expected {
             failures.push((expression, expected, actual));
         }
@@ -356,7 +374,7 @@ fn lexer_edge_cases_phprs_017() {
 #[test]
 fn tree_conservation_and_spans_phprs_019() {
     for &(_, source) in VALID {
-        let tree = parse(source, DEFAULT_OPTIONS).unwrap();
+        let tree = PhpParser.parse(source, DEFAULT_OPTIONS).unwrap();
         let mut parents = vec![0; tree.nodes.len()];
         for node in &tree.nodes {
             for &child in &tree.edges[node.children.clone()] {
@@ -384,17 +402,17 @@ fn short_tag_configuration_phprs_012() {
         ..DEFAULT_OPTIONS
     };
     let source = b"<? echo 1; ?>html <?php echo 2;";
-    let tree = parse(source, options).unwrap();
+    let tree = PhpParser.parse(source, options).unwrap();
     verify_tree(&tree);
     assert!(
         tree.nodes
             .iter()
             .any(|node| node.kind == SyntaxKind::Token("T_ECHO"))
     );
-    assert!(parse(b"<? echo ;", DEFAULT_OPTIONS).is_ok());
-    assert!(parse(b"<? echo ;", options).is_err());
-    assert!(parse(b"<?phpX;", options).is_ok());
-    assert!(parse(b"<?=1?>", options).is_ok());
+    assert!(PhpParser.parse(b"<? echo ;", DEFAULT_OPTIONS).is_ok());
+    assert!(PhpParser.parse(b"<? echo ;", options).is_err());
+    assert!(PhpParser.parse(b"<?phpX;", options).is_ok());
+    assert!(PhpParser.parse(b"<?=1?>", options).is_ok());
 }
 
 #[test]
@@ -404,21 +422,22 @@ fn deep_input_uses_bounded_heap_stacks_phprs_002() {
     source.extend_from_slice(b"1");
     source.extend(std::iter::repeat_n(b')', 4096));
     source.push(b';');
-    verify_tree(&parse(&source, DEFAULT_OPTIONS).unwrap());
+    verify_tree(&PhpParser.parse(&source, DEFAULT_OPTIONS).unwrap());
     let limits = phprs::contracts::Limits {
         stack: 32,
         ..DEFAULT_LIMITS
     };
     assert_eq!(
-        parse(
-            &source,
-            ParseOptions {
-                limits,
-                ..DEFAULT_OPTIONS
-            }
-        )
-        .unwrap_err()
-        .kind,
+        PhpParser
+            .parse(
+                &source,
+                ParseOptions {
+                    limits,
+                    ..DEFAULT_OPTIONS
+                }
+            )
+            .unwrap_err()
+            .kind,
         ErrorKind::Limit
     );
 }
@@ -432,7 +451,10 @@ fn heredoc_interpolation_boundaries_phprs_023() {
     ];
     for &source in sources {
         assert!(php_accepts(source), "invalid independent fixture");
-        assert!(parse(source, DEFAULT_OPTIONS).is_ok(), "{source:?}");
+        assert!(
+            PhpParser.parse(source, DEFAULT_OPTIONS).is_ok(),
+            "{source:?}"
+        );
     }
 }
 
@@ -465,7 +487,7 @@ fn mutated_fixtures_match_php_phprs_032() {
         for step in 0..9 {
             let changed = mutate_fixture(source, step);
             let expected = php_accepts(&changed);
-            let actual = parse(&changed, DEFAULT_OPTIONS).is_ok();
+            let actual = PhpParser.parse(&changed, DEFAULT_OPTIONS).is_ok();
             if actual != expected {
                 failures.push((name, step, changed, expected, actual));
             }

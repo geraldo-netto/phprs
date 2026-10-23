@@ -1,8 +1,9 @@
 # phprs
 
 A PHP implementation in Rust, with a long-term goal of becoming a production
-replacement for PHP. The current stage is PHP syntax support. The working tree
-implements a byte-oriented lexer, a parser derived from the PHP 8.3.6 grammar,
+replacement for PHP, targeting PHP 8.x.x. The current stage is PHP syntax support.
+The working tree implements a byte-oriented lexer, a parser derived from the
+PHP 8.3.6 grammar,
 and a syntax-checking CLI. Execution remains deferred.
 
 ## Check a file
@@ -30,13 +31,23 @@ Its tables preserve the upstream grammar's productions and precedence. This is
 syntax acceptance, not PHP semantic validation, name resolution, compilation,
 or runtime compatibility. Tests cover representative language families and a
 bounded invalid-input corpus; they do not establish equivalence for all inputs.
-The production compatibility profile is still undecided.
+PHP 8.x.x is the target family; only the PHP 8.3.6 grammar baseline has current
+comparison evidence. Other minor releases remain unverified (PHPRS-038).
+Production acceptance versions and application coverage remain undecided.
+There are no compatibility-only shims for previous phprs APIs or PHP versions
+outside the target. Syntax supported by PHP 8 remains part of the language.
 
 ## Contracts and ownership
 
 `src/contracts.rs` defines source spans, syntax nodes, diagnostics and per-call
-limits independently of parser storage algorithms or host APIs. `parse` accepts
-source bytes and options and returns a concrete syntax tree or a diagnostic.
+limits independently of parser storage algorithms or host APIs. Its focused
+`SyntaxParser` interface accepts source bytes and options and returns a concrete
+syntax tree or a diagnostic. `PhpParser` implements that interface with the
+checked-in grammar; the CLI depends only on the interface. `main` selects the
+implementation and connects host arguments and output streams. Callers use the
+interface directly.
+Contract tests use an independent implementation, and CLI fault tests inject a
+parser without depending on generated grammar tables.
 The tree borrows the source and owns flat node/edge vectors; it cannot outlive
 that source. Every non-root node has one parent; child spans lie within parent
 spans. EOF is excluded from tree storage. Trivia is retained in source bytes,
@@ -48,9 +59,11 @@ and 65,536 entries in each parser/lexer stack. Long and echo tags are enabled;
 short tags are opt-in through `ParseOptions`. The CLI uses the defaults and reads
 at most the source limit plus one byte to detect oversized files.
 
-Each parse owns its lexer frames, heredoc contexts and parser workspace. Contexts
-are referenced by indices while active; nested heredocs settle in stack order
-before an index can be reused. Parsing is synchronous, with no callbacks or
+`PhpParser` is stateless; its borrowed interface introduces no heap allocation or
+retained references. A result borrows only its input source, so it can outlive the
+parser instance. Each parse owns its lexer frames, heredoc contexts and parser
+workspace. Contexts are referenced by indices while active; nested heredocs settle
+in stack order before an index can be reused. Parsing is synchronous, with no callbacks or
 background work. On success the tree moves to the caller; temporary workspaces
 are dropped. On rejection or allocation failure all invocation-owned vectors
 are dropped. The CLI owns the file and source buffer for the call. Flat storage
@@ -78,7 +91,7 @@ in order. The differential tests use local PHP's `token_get_all` with
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 29 Rust tests and 15 Python tests, including
+Verification on 2026-10-23 passes 31 Rust tests and 15 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 PHP acceptance comparisons and deterministic generation of 1,121 states and
 586 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
