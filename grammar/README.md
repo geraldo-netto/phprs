@@ -30,5 +30,6 @@ Rust 1.98.1. Other versions have not been checked for byte-identical output.
 
 The installed PHP executable is 8.3.6 and can compare shared syntax only.
 Documentation-derived PHP 8.5 fixtures, table bounds and bounded invalid-input
-checks do not replace native PHP 8.5 acceptance evidence (PHPRS-053). Project
+checks do not replace native PHP 8.5 acceptance evidence, explicitly deferred by
+the owner on 2026-10-23 (PHPRS-053). Project
 licensing remains an owner decision (PHPRS-081).

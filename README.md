@@ -40,7 +40,7 @@ Tests cover representative families and bounded invalid inputs; they do not
 establish equivalence for all inputs. PHP 8.x.x is the target family, with PHP 8.5
 as the selected language baseline. The local PHP 8.3.6 oracle validates shared
 syntax only. PHP 8.5-only fixtures follow the independent language contract;
-native 8.5 comparison remains outstanding.
+native 8.5 comparison is deferred by owner instruction (2026-10-23).
 Production acceptance versions and application coverage remain undecided.
 There are no compatibility-only shims for previous phprs APIs or PHP versions
 outside the target. Syntax supported by PHP 8 remains part of the language.
