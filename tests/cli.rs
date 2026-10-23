@@ -23,3 +23,14 @@ fn binary_reports_syntax_errors_phprs_018() {
             .contains("byte 11")
     );
 }
+
+#[test]
+fn binary_selects_file_preamble_mode_phprs_043() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))
+        .args(["--check", "tests/fixtures/shebang.php"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert_eq!(output.stdout, b"Syntax OK\n");
+    assert!(output.stderr.is_empty());
+}

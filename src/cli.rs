@@ -1,5 +1,5 @@
 //! Native file and process adapter. Parsing itself has no host dependencies.
-use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, SyntaxParser};
+use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, ParseOptions, SyntaxParser};
 use std::ffi::OsString;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -39,7 +39,11 @@ fn check(parser: &dyn SyntaxParser, path: PathBuf, stdout: &mut impl Write) -> R
     let file =
         std::fs::File::open(&path).map_err(|error| format!("{}: {error}", path.display()))?;
     let source = read_source(file)?;
-    parser.parse(&source, DEFAULT_OPTIONS).map_err(|error| {
+    let options = ParseOptions {
+        skip_shebang: true,
+        ..DEFAULT_OPTIONS
+    };
+    parser.parse(&source, options).map_err(|error| {
         format!(
             "{}: byte {}: {} ({:?})",
             path.display(),
@@ -88,6 +92,7 @@ mod tests {
             assert_eq!(options.limits.nodes, DEFAULT_LIMITS.nodes);
             assert_eq!(options.limits.stack, DEFAULT_LIMITS.stack);
             assert!(!options.short_open_tags);
+            assert!(options.skip_shebang);
             Err(Diagnostic {
                 kind: ErrorKind::Allocation,
                 span: 0..0,

@@ -17,16 +17,22 @@ pub const DEFAULT_LIMITS: Limits = Limits {
     stack: 65_536,
 };
 
-/// PHP short opening tags are optional; long and echo tags are always enabled.
+/// Per-invocation source handling, independent of file and process adapters.
 #[derive(Clone, Copy, Debug)]
 pub struct ParseOptions {
     pub limits: Limits,
+    /// PHP short opening tags are optional; long and echo tags are always enabled.
     pub short_open_tags: bool,
+    /// File mode: discard an initial #! line through LF, or through EOF if absent.
+    /// The discarded bytes still count toward the source byte limit.
+    /// False (the default) treats these bytes as ordinary source text.
+    pub skip_shebang: bool,
 }
 
 pub const DEFAULT_OPTIONS: ParseOptions = ParseOptions {
     limits: DEFAULT_LIMITS,
     short_open_tags: false,
+    skip_shebang: false,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]

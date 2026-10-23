@@ -274,10 +274,25 @@ impl Drop for OracleChild {
 }
 
 fn php_accepts(source: &[u8]) -> bool {
+    php_accepts_with_args(
+        source,
+        &[
+            "-r",
+            "try { token_get_all(stream_get_contents(STDIN), TOKEN_PARSE); } catch (Throwable $e) { exit(1); }",
+        ],
+    )
+}
+
+fn php_accepts_with_args(source: &[u8], args: &[&str]) -> bool {
     use std::io::Write;
     use std::process::{Command, Stdio};
-    let child = Command::new("php").args(["-r", "try { token_get_all(stream_get_contents(STDIN), TOKEN_PARSE); } catch (Throwable $e) { exit(1); }"])
-        .stdin(Stdio::piped()).stdout(Stdio::null()).stderr(Stdio::null()).spawn().expect("local PHP oracle required");
+    let child = Command::new("php")
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("local PHP oracle required");
     let mut owned = OracleChild(child);
     owned.0.stdin.take().unwrap().write_all(source).unwrap();
     owned.0.wait().unwrap().success()
@@ -577,4 +592,94 @@ fn enum_keyword_prefix_truncations_phprs_039() {
             );
         }
     }
+}
+
+#[test]
+fn raw_source_keeps_shebang_text_phprs_043() {
+    let sources: &[&[u8]] = &[
+        b"#!<?php echo ;\n",
+        b"#!<?=;\n",
+        b"#!ignore <?php echo ;\n",
+        b"#!ignore <?php echo ;",
+        b"#!ignore\r<?php echo ;",
+    ];
+    for &source in sources {
+        assert!(!php_accepts(source), "oracle: {source:?}");
+        assert!(
+            PhpParser.parse(source, DEFAULT_OPTIONS).is_err(),
+            "{source:?}"
+        );
+    }
+}
+
+#[test]
+fn shebang_file_mode_phprs_043() {
+    let cases: &[(&[u8], bool)] = &[
+        (b"#!<?php echo ;\n", true),
+        (b"#!<?=;\n", true),
+        (b"#!ignore <?php echo ;", true),
+        (b"#!ignore\r<?php echo ;", true),
+        (b"#!ignore\n<?php echo 1;", true),
+        (b"#!ignore\r\n<?php echo 1;", true),
+        (b"#!ignore\n<?php echo ;", false),
+        (b"#!ignore\r\n<?php echo ;", false),
+        (b" #!<?php echo ;\n", false),
+        (b"#!ignore\n#!<?php echo ;\n", false),
+        (b"<?php echo ;", false),
+        (b"", true),
+    ];
+    let options = ParseOptions {
+        skip_shebang: true,
+        ..DEFAULT_OPTIONS
+    };
+    for &(source, expected) in cases {
+        assert_eq!(
+            php_accepts_with_args(source, &["-n", "-l"]),
+            expected,
+            "file oracle: {source:?}"
+        );
+        assert_eq!(
+            PhpParser.parse(source, options).is_ok(),
+            expected,
+            "{source:?}"
+        );
+    }
+}
+
+#[test]
+fn shebang_spans_and_bounds_phprs_043() {
+    let source = b"#!runner\n<?php echo 1;";
+    let raw = PhpParser.parse(source, DEFAULT_OPTIONS).unwrap();
+    let html = raw
+        .nodes
+        .iter()
+        .find(|node| node.kind == SyntaxKind::Token("T_INLINE_HTML"))
+        .unwrap();
+    assert_eq!(html.span, 0..9);
+    let mut options = ParseOptions {
+        skip_shebang: true,
+        ..DEFAULT_OPTIONS
+    };
+    let file = PhpParser.parse(source, options).unwrap();
+    assert!(
+        !file
+            .nodes
+            .iter()
+            .any(|node| node.kind == SyntaxKind::Token("T_INLINE_HTML"))
+    );
+    verify_tree(&raw);
+    verify_tree(&file);
+    options.limits.source_bytes = source.len() - 1;
+    assert_eq!(
+        PhpParser.parse(source, options).unwrap_err().kind,
+        ErrorKind::Limit
+    );
+    options.limits = DEFAULT_LIMITS;
+    options.limits.tokens = 0;
+    verify_tree(&PhpParser.parse(b"#!ignored", options).unwrap());
+    options.skip_shebang = false;
+    assert_eq!(
+        PhpParser.parse(b"#!ignored", options).unwrap_err().kind,
+        ErrorKind::Limit
+    );
 }

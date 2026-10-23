@@ -11,7 +11,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-043 | open | Make shebang source handling explicit | src/syntax/lexer/mod.rs Lexer::new; src/contracts.rs ParseOptions; src/cli.rs | Lexer always discards a leading #! line, while TOKEN_PARSE treats it as source HTML and can reject PHP on that line. Define raw-source parsing separately from file preamble handling, expose an independent option, select file handling in the CLI and verify both modes with the appropriate local oracle. |
 | PHPRS-010 | in_progress | Finish the PHP 8.3 syntax delivery gate | PHPRS-031 | Retain the implemented source-spanned parser, pinned grammar, passing language-family/differential/invalid-input corpus and CLI; close the remaining function-quality evidence before declaring the syntax stage verified. Execution remains deferred. |
 
 ## Execution and values

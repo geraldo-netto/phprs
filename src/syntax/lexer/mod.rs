@@ -68,7 +68,7 @@ pub(super) struct Lexer<'source> {
 impl<'source> Lexer<'source> {
     pub fn new(source: &'source [u8], options: ParseOptions) -> Self {
         let mut position = 0;
-        if source.starts_with(b"#!") {
+        if options.skip_shebang && source.starts_with(b"#!") {
             position = source
                 .iter()
                 .position(|&byte| byte == b'\n')
