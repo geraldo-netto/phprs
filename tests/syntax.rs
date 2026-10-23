@@ -1068,3 +1068,33 @@ fn string_invalid_boundaries_phprs_111() {
         );
     }
 }
+
+#[test]
+fn source_tag_trivia_traces_phprs_112() {
+    for source in [
+        b"plain text".as_slice(),
+        b"<?php",
+        b"<?php\n;",
+        b"before <?= 1 ?>\r\nafter",
+        b"<?PHP\t// line\n; ?>\nbody",
+        b"<?php /*block*/ /**doc*/ #line\r\n;",
+        b"<?php echo 1;// ?>\r\ntext",
+        b"<?php echo 1;# ?>\ntext",
+        b"<?php // line ends at EOF",
+        b"<?php # hash ends at EOF",
+        b"<?php /* ?> still comment */ echo 1;",
+        b"<?php\x0b\x0c echo 1;",
+        b"<?phpx is text",
+        b"<?php\0 not an opening tag",
+        b"<?xml version='1.0'?>",
+        b"<?php echo 1;?>\rhtml",
+        b"<?php echo 1;?>\r\nhtml",
+    ] {
+        assert_token_trace(source);
+        for end in 0..source.len() {
+            if let Ok(tree) = PhpParser.parse(&source[..end], DEFAULT_OPTIONS) {
+                common::verify_tree(&tree);
+            }
+        }
+    }
+}

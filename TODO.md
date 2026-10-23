@@ -10,8 +10,8 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-112 | open | Audit source-tag and trivia boundaries | PHPRS-092 | Compare tags, HTML, whitespace, comment endings and halt payload behavior against native observations, with option-aware spans and bounded invalid prefixes. |
-| PHPRS-052 | open | Close the independent lexical audit | PHPRS-109, PHPRS-110, PHPRS-111, PHPRS-112 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |
+| PHPRS-114 | open | Admit late-static scoped access | PHP 8 language contract; local token-parse observations | The grammar lacks `static::method()`, `static::$property` and `static::CONSTANT`. Add scoped constant/property/dynamic/call forms without admitting bare static expressions, with permanent failing-before/passing-after regressions. |
+| PHPRS-115 | open | Admit readonly function identifiers | PHP 8 language contract; local token-parse observations | The grammar rejects function declarations/calls named readonly, although native parsing admits this contextual identifier. Preserve readonly modifiers and reject forbidden class/constant placements; retain failing-before/passing-after tests. |
 | PHPRS-053 | deferred | Compare syntax with a native PHP 8.5 oracle | Owner instruction 2026-10-23: skip native 8.5 validation and continue implementation | Native PHP 8.5 comparison is explicitly deferred; only PHP 8.3.6 is installed. Revisit only on owner resumption with an available executable or explicit transfer authorization. Do not claim native 8.5 equivalence. |
 | PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-090, PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. Execution remains deferred. |
 
