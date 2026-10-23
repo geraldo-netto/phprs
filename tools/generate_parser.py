@@ -35,7 +35,21 @@ def grammar_text(source):
     header, body, _ = source.split('%%', 2)
     directives = re.findall(r'^%(?:precedence|left|right|nonassoc|token)\b[^\n]*', header, re.M)
     declarations = re.sub(r'<(?:ast|ident|num|ptr|str)>', '', '\n'.join(directives))
-    return declarations + '\n%expect 0\n%%\n' + remove_actions(body) + '\n%%\n'
+    return normalize_grammar(declarations + '\n%expect 0\n%%\n' + remove_actions(body) + '\n%%\n')
+
+
+def normalize_grammar(text):
+    """Normalize line margins of local grammar text, preserving token literals.
+
+    Strings are call-owned; output is bounded by four times the input length.
+    Only indentation tabs expand; interior bytes and newline counts stay intact.
+    """
+    lines = []
+    for line in text.split('\n'):
+        content = line.lstrip(' \t')
+        indentation = line[:len(line) - len(content)].expandtabs(4)
+        lines.append((indentation + content).rstrip(' \t'))
+    return '\n'.join(lines)
 
 
 def reduction_value(rule):

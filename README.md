@@ -91,7 +91,7 @@ in order. The differential tests use local PHP's `token_get_all` with
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 33 Rust tests and 15 Python tests, including
+Verification on 2026-10-23 passes 33 Rust tests and 17 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 PHP acceptance comparisons and deterministic generation of 1,121 states and
 586 rules. Fresh LLVM counters meet 80 percent executable-line coverage for

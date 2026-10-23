@@ -10,7 +10,9 @@ Both Zend source files retain their copyright and Zend Engine License 2.00
 headers. The PHP License 3.01 and Zend license texts are retained alongside them.
 Derived grammar/tables retain these origins; the generator removes PHP semantic
 C actions and comments while preserving syntax productions, tokens and
-precedence. Consult the retained licenses for their terms. These notices do not
+precedence. Generated line margins use spaces and omit trailing whitespace;
+quoted literals and pinned source bytes remain unchanged. Consult the retained
+licenses for their terms. These notices do not
 select a license for phprs; that owner decision remains PHPRS-081.
 
 SHA-256 of the local inputs:

@@ -25,6 +25,26 @@ class GrammarTests(unittest.TestCase):
         self.assertEqual(generator.reduction_value('accept'), 32767)
         self.assertEqual(generator.reduction_value('3'), -4)
 
+    def test_grammar_whitespace_phprs_036(self):
+        source = '%token T_TEXT "a\tb"  \n%%\n \tstart: T_TEXT { action(); } \t\n\t| \' \' ; \t\n%%\n'
+        result = generator.grammar_text(source)
+        self.assertIn('%token T_TEXT "a\tb"\n', result)
+        self.assertIn('    start: T_TEXT\n', result)
+        self.assertIn("    | ' ' ;\n", result)
+        self.assertTrue(result.endswith('\n'))
+        for line in result.splitlines():
+            self.assertEqual(line, line.rstrip(' \t'))
+            indentation = line[:len(line) - len(line.lstrip(' \t'))]
+            self.assertNotIn('\t', indentation)
+
+    def test_grammar_whitespace_boundaries_phprs_036(self):
+        for source in ['', ' \t', '\n', '\t\n \t\n', '    x', "\t'\t' \t", 'x\ty\n']:
+            result = generator.normalize_grammar(source)
+            self.assertEqual(generator.normalize_grammar(result), result)
+            self.assertEqual(result.count('\n'), source.count('\n'))
+            self.assertLessEqual(len(result), 4 * len(source))
+        self.assertEqual(generator.normalize_grammar("\t'\t' \t"), "    '\t'")
+
     def test_transition_and_reduction_contract(self):
         state = ET.fromstring('''<state><actions><transitions><transition symbol="token" type="shift" state="2"/><transition symbol="rule" type="goto" state="3"/></transitions><errors><error symbol="bad"/></errors><reductions><reduction symbol="token" rule="8" enabled="false"/><reduction symbol="bad" rule="4" enabled="true"/><reduction symbol="$default" rule="2" enabled="true"/></reductions></actions></state>''')
         symbols = {'token': 1, 'rule': 2, 'bad': 3}
