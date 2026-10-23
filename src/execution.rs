@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! One echo delivery: syntax adaptation and bounded literal evaluation.
 use crate::contracts::{Diagnostic, ErrorKind, SyntaxKind, SyntaxParser, SyntaxTree};
 use crate::execution_contracts::{ExecutionOptions, SourceExecutor};

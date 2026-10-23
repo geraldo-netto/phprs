@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 #[test]
 fn binary_runs_hello_world_phprs_030() {
     let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))

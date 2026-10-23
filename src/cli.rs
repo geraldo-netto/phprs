@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Native file and process adapter for syntax checks and the selected execution.
 use phprs::contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, Diagnostic, ParseOptions, SyntaxParser};
 use phprs::execution_contracts::{ExecutionOptions, SourceExecutor};

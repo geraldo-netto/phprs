@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Independent contracts for the selected hello world execution delivery.
 use crate::contracts::{Diagnostic, ParseOptions};
 

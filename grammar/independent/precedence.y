@@ -1,3 +1,7 @@
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 %precedence P_ARROW
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR

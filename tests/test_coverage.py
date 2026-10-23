@@ -1,3 +1,6 @@
+# Copyright 2026 Geraldo Netto
+# SPDX-License-Identifier: Apache-2.0
+
 from pathlib import Path
 import unittest
 from unittest.mock import patch

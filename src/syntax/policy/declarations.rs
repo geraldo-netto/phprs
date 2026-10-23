@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Declaration-specific modifier contracts over the borrowed syntax view.
 use super::NodeView;
 use crate::contracts::{Diagnostic, SyntaxKind};

@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 use phprs::contracts::{SyntaxKind, SyntaxTree};
 
 pub fn verify_tree(tree: &SyntaxTree<'_>) {

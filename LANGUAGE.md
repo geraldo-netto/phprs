@@ -1,3 +1,6 @@
+<!-- Copyright 2026 Geraldo Netto
+SPDX-License-Identifier: Apache-2.0 -->
+
 # Independent syntax contract
 
 Status: the PHP 8.x target and independent-implementation requirement are accepted

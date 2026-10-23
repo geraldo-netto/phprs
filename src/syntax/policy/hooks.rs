@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Hook-name policy borrows source spans; it owns no resources or retained state.
 use super::NodeView;
 use crate::contracts::Diagnostic;

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2026 Geraldo Netto
+# SPDX-License-Identifier: Apache-2.0
+
 """Enforce source-function coverage using LLVM's own annotated line counts."""
 import json
 import os

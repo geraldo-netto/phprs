@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Independent syntax contracts. All offsets are byte offsets into the source.
 use std::ops::Range;
 

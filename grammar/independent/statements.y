@@ -1,3 +1,7 @@
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Independently authored source and statement syntax; see LANGUAGE.md. */
 start:
     file_items

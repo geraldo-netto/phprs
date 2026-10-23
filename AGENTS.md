@@ -1,3 +1,6 @@
+<!-- Copyright 2026 Geraldo Netto
+SPDX-License-Identifier: Apache-2.0 -->
+
 # Project instructions
 
 ## Delivery scope
@@ -33,6 +36,20 @@
   condition. Remove completed entries; preserve deliberate deferrals.
 - Reassess the next smallest verifiable example after each delivery. Deferred
   features do not automatically become active work.
+
+## Licensing and future development
+
+- Owner decision (2026-10-23): license the current public hello world base under
+  Apache-2.0, using the standard unmodified license text and accurate notices.
+- Attribute relevant authored files to Geraldo Netto with a copyright header and
+  an Apache-2.0 SPDX identifier. Preserve interpreter shebangs and exact-byte
+  fixtures; use metadata for formats without comments. Generated source headers
+  must be emitted by the generator. Leave standard license text unmodified.
+- Further development is intended for a separate private, proprietary edition.
+  Do not publish subsequent implementation work under Apache-2.0 automatically;
+  establish its repository and licensing boundary before starting that work.
+- Preserve recipients' Apache-2.0 rights to the published base. The public-base
+  license does not relicense removed material in earlier Git history.
 
 ## Implementation quality
 

@@ -1,4 +1,6 @@
 {
+  "copyright": "Copyright 2026 Geraldo Netto",
+  "license": "Apache-2.0",
   "provenance": {
     "basis": "Independent vocabulary from published language syntax and public tokenization observations; no PHP implementation grammar or numeric token IDs.",
     "observed_php": "8.3.6",

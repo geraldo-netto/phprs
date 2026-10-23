@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 // Generated from independent language contracts. See LANGUAGE.md.
 pub const T_ABSTRACT: u16 = 3;
 pub const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: u16 = 4;

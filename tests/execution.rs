@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 use phprs::contracts::{DEFAULT_OPTIONS, ErrorKind, ParseOptions};
 use phprs::execution_contracts::{ExecutionOptions, SourceExecutor};
 use phprs::{EchoExecutor, PhpParser};

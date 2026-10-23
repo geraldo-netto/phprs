@@ -1,3 +1,7 @@
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Independently authored expression syntax; see LANGUAGE.md. No engine grammar input. */
 expression:
     postfix %prec P_ATOM

@@ -1,3 +1,6 @@
+<!-- Copyright 2026 Geraldo Netto
+SPDX-License-Identifier: Apache-2.0 -->
+
 # phprs
 
 A PHP implementation in Rust, with a long-term goal of becoming a production
@@ -14,6 +17,26 @@ Safety and speed remain measured acceptance goals.
 [LANGUAGE.md](LANGUAGE.md) defines the independent requirements.
 `grammar/vocabulary.json` records language-level token classes and spellings
 from documentation and public tokenization observations, without PHP token IDs.
+
+## License
+
+Copyright 2026 Geraldo Netto.
+
+The current public hello world base, including its source, grammar, generated
+tables, tests, tooling and documentation, is licensed under the Apache License,
+Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The implementation
+baseline is commit `34eb86e`; this licensing update accompanies that baseline.
+This declaration does not relicense removed material in earlier Git history.
+
+Authored source, grammar, tooling, tests, configuration and documentation carry
+copyright headers; JSON vocabulary uses copyright and license metadata. The
+generator emits headers for generated source. Exact-byte PHP fixtures keep their
+original bytes and are covered by this declaration and NOTICE. The standard
+license text and Cargo-managed lockfile retain their supplied format.
+
+Future development is intended for a separate private, proprietary edition.
+That does not withdraw the Apache-2.0 permissions granted for this public base;
+recipients may continue using, modifying and redistributing it under that license.
 
 ## Run hello world
 

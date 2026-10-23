@@ -1,3 +1,7 @@
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Independently authored declarations and types; see LANGUAGE.md. */
 function_definition:
     T_FUNCTION reference_opt T_STRING parameter_clause return_annotation block

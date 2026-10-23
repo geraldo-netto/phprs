@@ -1,3 +1,6 @@
+# Copyright 2026 Geraldo Netto
+# SPDX-License-Identifier: Apache-2.0
+
 """Language-level vocabulary checked without PHP implementation sources."""
 import json
 from pathlib import Path

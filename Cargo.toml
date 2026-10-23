@@ -1,8 +1,12 @@
+# Copyright 2026 Geraldo Netto
+# SPDX-License-Identifier: Apache-2.0
+
 [package]
 name = "phprs"
 version = "0.1.0"
 edition = "2024"
 publish = false
 description = "PHP syntax support and hello world execution in Rust"
+license = "Apache-2.0"
 
 [dependencies]

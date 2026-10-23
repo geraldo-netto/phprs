@@ -1,3 +1,7 @@
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 %start start
 %token T_ABSTRACT
 %token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
@@ -150,6 +154,10 @@
 %token T_XOR_EQUAL
 %token T_YIELD
 %token T_YIELD_FROM
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 %precedence P_ARROW
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -187,6 +195,10 @@
 
 %expect 0
 %%
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Independently authored source and statement syntax; see LANGUAGE.md. */
 start:
     file_items
@@ -343,6 +355,10 @@ file_halt:
 place_list:
     place | place_list ',' place
 ;
+
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* Independently authored expression syntax; see LANGUAGE.md. No engine grammar input. */
 expression:
@@ -627,6 +643,10 @@ prefix_mutation:
 reference_assignment:
     place '=' reference_mark expression %prec P_REFERENCE
 ;
+
+/* Copyright 2026 Geraldo Netto
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* Independently authored declarations and types; see LANGUAGE.md. */
 function_definition:

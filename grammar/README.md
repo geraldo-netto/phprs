@@ -1,3 +1,6 @@
+<!-- Copyright 2026 Geraldo Netto
+SPDX-License-Identifier: Apache-2.0 -->
+
 # Independent syntax grammar
 
 The language contract is defined in [LANGUAGE.md](../LANGUAGE.md).
@@ -31,5 +34,7 @@ Rust 1.98.1. Other versions have not been checked for byte-identical output.
 The installed PHP executable is 8.3.6 and can compare shared syntax only.
 Documentation-derived PHP 8.5 fixtures, table bounds and bounded invalid-input
 checks do not replace native PHP 8.5 acceptance evidence, explicitly deferred by
-the owner on 2026-10-23 (PHPRS-053). Project
-licensing remains an owner decision (PHPRS-081).
+the owner on 2026-10-23 (PHPRS-053). The current grammar and generated Rust tables
+are covered by the project's [Apache-2.0 license](../LICENSE); see
+[NOTICE](../NOTICE). The independent-implementation provenance described above
+remains distinct from a completed third-party provenance audit (PHPRS-116).

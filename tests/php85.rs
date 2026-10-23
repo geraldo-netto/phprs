@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Independent PHP 8.5 fixtures follow the language contract, not a PHP 8.3 oracle.
 mod common;
 use phprs::{

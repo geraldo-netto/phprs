@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! Read/write visibility ordering; fixed scratch is borrowed for this call only.
 fn rank(name: &str) -> Option<u8> {
     match name {

@@ -1,3 +1,6 @@
+// Copyright 2026 Geraldo Netto
+// SPDX-License-Identifier: Apache-2.0
+
 //! The consumer needs only contracts; no concrete parser or generated symbol IDs.
 use phprs::contracts::{
     DEFAULT_OPTIONS, Diagnostic, ParseOptions, SyntaxKind, SyntaxNode, SyntaxParser, SyntaxTree,

@@ -1,8 +1,12 @@
+<!-- Copyright 2026 Geraldo Netto
+SPDX-License-Identifier: Apache-2.0 -->
+
 # TODO
 
-Current scope (owner instruction 2026-10-23): make the hello world example run;
-skip other work. The unfinished syntax gate does not block this narrow delivery.
-Native PHP 8.5 comparison stays deferred; SonarQube measurement is unavailable.
+Current scope (owner instruction 2026-10-23): license the public hello world base
+under Apache-2.0; further development is intended private and proprietary.
+Other runtime work and native PHP 8.5 comparison stay deferred; SonarQube
+measurement is unavailable.
 
 ## Delivery and compatibility
 
@@ -72,4 +76,5 @@ Native PHP 8.5 comparison stays deferred; SonarQube measurement is unavailable.
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
 | PHPRS-080 | deferred | Optimize measured bottlenecks | After correct representative workloads exist | Publish reproducible latency, throughput, startup, and memory baselines; introduce bytecode, caches, or JIT only when measurements justify them, retaining one authoritative execution path. |
-| PHPRS-081 | deferred | Choose licensing and package releases | Owner license decision required before adding a license; packaging follows a verified runnable delivery | Select a project license and audit any reused PHP material/dependencies; produce reproducible packages only for validated targets. Public repository visibility does not supply a license. |
+| PHPRS-116 | open | Audit public-base provenance and third-party notices | Apache-2.0 selected; current independent-implementation provenance in LANGUAGE.md and grammar/README.md | Audit the current source, grammar, vocabulary, fixtures, tooling and generated artifacts for third-party material and required notices; document origins and redistribution permissions before packaging. Review removed historical material separately; the current license does not relicense earlier Git history. License selection alone is not a completed provenance audit. |
+| PHPRS-081 | deferred | Package verified public-base releases | PHPRS-116; owner resumption of packaging | Apache-2.0 is selected for the public base. Produce reproducible packages only for validated targets after the provenance audit; further private/proprietary development requires a separate repository and licensing boundary. |
