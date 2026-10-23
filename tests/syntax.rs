@@ -698,3 +698,57 @@ fn syntax_destination_call_forms_phprs_097() {
         common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
     }
 }
+
+#[test]
+fn modifier_conflicts_phprs_057() {
+    for modifiers in [
+        "public private",
+        "public protected",
+        "protected private",
+        "public public",
+        "static static",
+        "abstract final",
+        "final abstract",
+        "readonly readonly",
+        "final final",
+        "abstract abstract",
+    ] {
+        for body in ["$x;", "function f();"] {
+            let source = format!("<?php abstract class C {{ {modifiers} {body} }}");
+            assert!(!php_accepts(source.as_bytes()), "oracle: {source}");
+            assert!(
+                PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+                "{source}"
+            );
+        }
+    }
+    for modifiers in [
+        "abstract final",
+        "final abstract",
+        "abstract abstract",
+        "final final",
+        "readonly readonly",
+    ] {
+        let source = format!("<?php {modifiers} class C {{}}");
+        assert!(!php_accepts(source.as_bytes()), "oracle: {source}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
+
+#[test]
+fn distinct_modifiers_remain_admitted_phprs_057() {
+    for source in [
+        "<?php abstract readonly class C {}",
+        "<?php final readonly class C {}",
+        "<?php class C { public static $x; }",
+        "<?php abstract class C { abstract protected function f(); }",
+        "<?php class C { final protected function f() {} }",
+        "<?php class C { function __construct(public readonly int $x) {} }",
+    ] {
+        assert!(php_accepts(source.as_bytes()), "oracle: {source}");
+        common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
+    }
+}

@@ -203,3 +203,23 @@ fn property_comment_boundaries_phprs_048() {
         common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
     }
 }
+
+#[test]
+fn setter_modifier_conflicts_phprs_057() {
+    for modifiers in [
+        "public(set) private(set)",
+        "protected(set) private(set)",
+        "private(set) private(set)",
+    ] {
+        let sources = [
+            format!("<?php class C {{ {modifiers} int $x; }}"),
+            format!("<?php class C {{ function __construct(public {modifiers} int $x) {{}} }}"),
+        ];
+        for source in sources {
+            assert!(
+                PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+                "{source}"
+            );
+        }
+    }
+}
