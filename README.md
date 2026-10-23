@@ -110,7 +110,7 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 80 Rust tests and 20 Python tests, including
+Verification on 2026-10-23 passes 81 Rust tests and 20 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP acceptance comparisons and deterministic generation of
 1,113 states and 634 rules. Fresh LLVM counters meet 80 percent executable-line coverage for

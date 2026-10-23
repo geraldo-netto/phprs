@@ -874,3 +874,87 @@ fn removed_casts_rejected_phprs_113() {
         );
     }
 }
+
+fn observed_token_trace(source: &[u8]) -> String {
+    use std::io::{Read, Write};
+    use std::process::{Command, Stdio};
+    let program = concat!(
+        "$p=0;foreach(token_get_all(stream_get_contents(STDIN)) as $t){",
+        "if(is_array($t)){$n=token_name($t[0]);$s=$t[1];}else{$n=\"'\".$t.\"'\";$s=$t;}",
+        "$e=$p+strlen($s);",
+        "if(!in_array($n,['T_OPEN_TAG','T_WHITESPACE','T_COMMENT','T_DOC_COMMENT'],true)){",
+        "$n=match($n){'T_OPEN_TAG_WITH_ECHO'=>'T_ECHO','T_CLOSE_TAG'=>\"';'\",default=>$n};",
+        "echo $n,\"\\t\",$p,\"\\t\",$e,\"\\n\";}$p=$e;}"
+    );
+    let child = Command::new("php")
+        .args(["-r", program])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut owned = OracleChild(child);
+    owned.0.stdin.take().unwrap().write_all(source).unwrap();
+    let mut trace = String::new();
+    owned
+        .0
+        .stdout
+        .take()
+        .unwrap()
+        .read_to_string(&mut trace)
+        .unwrap();
+    assert!(owned.0.wait().unwrap().success());
+    trace
+}
+
+fn assert_token_trace(source: &[u8]) {
+    use std::fmt::Write;
+    let tree = PhpParser
+        .parse(source, DEFAULT_OPTIONS)
+        .unwrap_or_else(|error| panic!("{source:?}: {error:?}"));
+    common::verify_tree(&tree);
+    let mut tokens: Vec<_> = tree
+        .nodes
+        .iter()
+        .filter(|node| matches!(node.kind, SyntaxKind::Token(_)))
+        .collect();
+    tokens.sort_by_key(|node| node.span.start);
+    let mut actual = String::new();
+    for node in tokens {
+        if let SyntaxKind::Token(name) = node.kind {
+            writeln!(actual, "{name}\t{}\t{}", node.span.start, node.span.end).unwrap();
+        }
+    }
+    assert_eq!(actual, observed_token_trace(source), "{source:?}");
+}
+
+#[test]
+fn word_operator_traces_phprs_109() {
+    for &(name, source) in VALID {
+        if [
+            "operators",
+            "precedence",
+            "comparison",
+            "types",
+            "functions",
+            "namespaces",
+            "objects",
+            "enums",
+            "builtins",
+            "magic",
+        ]
+        .contains(&name)
+        {
+            assert_token_trace(source);
+        }
+    }
+    for source in [
+        "<?php NaMeSpAcE A; FuNcTiOn F() { ReTuRn \\A\\f(); }",
+        "<?php $obj->class; $obj?->private; $obj->match; C::class;",
+        "<?php enum E {case A;} function enum(){} enum();",
+        "<?php function f(A&B $v) { $x=$a & $b; $x=& /* c */ $v; yield /* c */ from $v; }",
+        "<?php $a=(integer)1; $b=(boolean)1; $c=(double)1; $d=(binary)1;",
+    ] {
+        assert_token_trace(source.as_bytes());
+    }
+}

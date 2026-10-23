@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-109 | open | Audit word/operator token classes and spans | PHPRS-092 | Compare a bounded contextual corpus of keywords, qualified names, magic names, casts and operators against public native token traces; retain exact class/span checks and invalid/truncated boundaries. |
 | PHPRS-110 | open | Audit numeric token boundaries | PHPRS-092 | Compare radix prefixes, separators, exponent forms and integer-overflow boundaries against native token traces; retain invalid forms and bounded boundary generation. |
 | PHPRS-111 | open | Audit string/interpolation token boundaries | PHPRS-092 | Compare quoted, binary, interpolated, heredoc and nowdoc classes/spans against native observations; retain context-switch, truncation and malformed-indent checks. |
 | PHPRS-112 | open | Audit source-tag and trivia boundaries | PHPRS-092 | Compare tags, HTML, whitespace, comment endings and halt payload behavior against native observations, with option-aware spans and bounded invalid prefixes. |
