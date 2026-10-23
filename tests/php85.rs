@@ -399,3 +399,57 @@ fn attributed_constant_boundaries_phprs_056() {
         );
     }
 }
+
+#[test]
+fn property_hook_forms_phprs_049() {
+    verify_sources_and_prefixes(&[
+        "<?php class C { public $value {} }",
+        "<?php class C { public string $value = 'x' { get { return $this->value; } set { $this->value = $value; } } }",
+        "<?php class C { protected string $value { get => $this->value; set => trim($value); } }",
+        "<?php class C { public string $value { set(string|Stringable $incoming) { $this->value = (string)$incoming; } } }",
+        "<?php class C { public array $value { &get { return $this->value; } } }",
+        "<?php class C { public array $value { &get => $this->value; } }",
+        "<?php abstract class C { abstract public string $value { get; set; } }",
+        "<?php interface I { public string $value { get; } }",
+        "<?php class C { #[A] public string $value { #[B] final get => 'x'; #[C] set => $value; } }",
+        "<?php class C { function __construct(public private(set) string $value { get => $this->value; set(string $v) => $v; }) {} }",
+        "<?php class C { public string $value { get => parent::$value::get(); set { parent::$value::set($value); } } }",
+        "<?php class C { public string $value { get { $name = __PROPERTY__; return $this->$name; } } }",
+    ]);
+}
+
+#[test]
+fn property_hook_boundaries_phprs_049() {
+    for source in [
+        "<?php class C { public $x { get =>; } }",
+        "<?php class C { public $x { get => 1 } }",
+        "<?php class C { public $x { get() } }",
+        "<?php class C { public $x { set($value,) =>; } }",
+        "<?php class C { public $x { set(,) {} } }",
+        "<?php class C { public $x, $y { get => 1; } }",
+        "<?php class C { public $x { get {} }; }",
+        "<?php class C { public $x { & => 1; } }",
+        "<?php class C { public $x { get: 1; } }",
+        "<?php class C { public $x { get => 1; set { } }",
+    ] {
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
+
+#[test]
+fn property_magic_token_phprs_049() {
+    for name in ["__PROPERTY__", "__property__", "__PrOpErTy__"] {
+        let source = format!("<?php class C {{ public $x {{ get => {name}; }} }}");
+        let tree = PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap();
+        common::verify_tree(&tree);
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|node| node.kind == SyntaxKind::Token("T_PROPERTY_C")
+                    && &source[node.span.clone()] == name)
+        );
+    }
+}

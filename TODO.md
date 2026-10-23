@@ -10,7 +10,7 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-049 | open | Verify property-hook syntax and __PROPERTY__ | PHPRS-090, PHPRS-045 | Cover block/arrow/abstract and attributed hooks, references, parameter lists and promoted hooks; distinguish grammar acceptance from compile-time restrictions and retain malformed/truncation tests. |
+| PHPRS-104 | open | Validate property-hook names and duplicate hooks | PHPRS-049; PHP property-hook manual | The grammar admits `get; get;`, `get; &get;` and arbitrary hook names. Validate the documented get/set names and uniqueness from source spans, distinguishing syntax restrictions from compiler checks; retain permanent failing-before/passing-after tests. |
 | PHPRS-052 | open | Audit lexical behavior against independent contracts | PHPRS-092 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |
 | PHPRS-101 | open | Validate modifier applicability by declaration kind | PHPRS-057 | Define admitted modifier classes for methods, constants, properties, promoted parameters and hooks from documentation/behavior; reject misplaced readonly/set/static forms, with separate native-8.5 evidence where unavailable. |
 | PHPRS-102 | open | Validate asymmetric read/write visibility ordering | PHPRS-057; PHP manual visibility contract | Reject setter visibility more permissive than read visibility, preserve valid defaults and stricter setters, and retain property/promotion boundary fixtures. |
