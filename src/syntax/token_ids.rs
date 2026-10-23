@@ -141,44 +141,43 @@ pub const T_TRAIT: u16 = 141;
 pub const T_TRAIT_C: u16 = 142;
 pub const T_TRY: u16 = 143;
 pub const T_UNSET: u16 = 144;
-pub const T_UNSET_CAST: u16 = 145;
-pub const T_USE: u16 = 146;
-pub const T_VAR: u16 = 147;
-pub const T_VARIABLE: u16 = 148;
-pub const T_VOID_CAST: u16 = 149;
-pub const T_WHILE: u16 = 150;
-pub const T_WHITESPACE: u16 = 151;
-pub const T_XOR_EQUAL: u16 = 152;
-pub const T_YIELD: u16 = 153;
-pub const T_YIELD_FROM: u16 = 154;
+pub const T_USE: u16 = 145;
+pub const T_VAR: u16 = 146;
+pub const T_VARIABLE: u16 = 147;
+pub const T_VOID_CAST: u16 = 148;
+pub const T_WHILE: u16 = 149;
+pub const T_WHITESPACE: u16 = 150;
+pub const T_XOR_EQUAL: u16 = 151;
+pub const T_YIELD: u16 = 152;
+pub const T_YIELD_FROM: u16 = 153;
 pub(crate) static PUNCTUATION: &[(u8, u16)] = &[
-    (33, 170),
-    (34, 188),
-    (36, 187),
-    (37, 169),
-    (40, 177),
-    (41, 182),
-    (42, 167),
-    (43, 165),
-    (44, 183),
-    (45, 166),
-    (46, 164),
-    (47, 168),
-    (58, 158),
-    (59, 181),
-    (60, 162),
-    (61, 156),
-    (62, 163),
-    (63, 157),
-    (64, 185),
-    (91, 178),
-    (93, 186),
-    (94, 160),
-    (96, 189),
-    (123, 179),
-    (124, 159),
-    (125, 180),
-    (126, 184),
+    (33, 169),
+    (34, 187),
+    (36, 186),
+    (37, 168),
+    (40, 176),
+    (41, 181),
+    (42, 166),
+    (43, 164),
+    (44, 182),
+    (45, 165),
+    (46, 163),
+    (47, 167),
+    (58, 157),
+    (59, 180),
+    (60, 161),
+    (61, 155),
+    (62, 162),
+    (63, 156),
+    (64, 184),
+    (91, 177),
+    (93, 185),
+    (94, 159),
+    (96, 188),
+    (123, 178),
+    (124, 158),
+    (125, 179),
+    (126, 183),
 ];
 pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_ABSTRACT, "T_ABSTRACT"),
@@ -329,7 +328,6 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_TRAIT_C, "T_TRAIT_C"),
     (T_TRY, "T_TRY"),
     (T_UNSET, "T_UNSET"),
-    (T_UNSET_CAST, "T_UNSET_CAST"),
     (T_USE, "T_USE"),
     (T_VAR, "T_VAR"),
     (T_VARIABLE, "T_VARIABLE"),
@@ -416,11 +414,11 @@ pub(crate) static KEYWORDS: &[(&str, u16)] = &[
     ("trait", 141),
     ("try", 143),
     ("unset", 144),
-    ("use", 146),
-    ("var", 147),
-    ("while", 150),
+    ("use", 145),
+    ("var", 146),
+    ("while", 149),
     ("xor", 93),
-    ("yield", 153),
+    ("yield", 152),
 ];
 pub(crate) static OPERATORS: &[(&[u8], u16)] = &[
     (b"!==", 86),
@@ -455,7 +453,7 @@ pub(crate) static OPERATORS: &[(&[u8], u16)] = &[
     (b">=", 83),
     (b">>", 132),
     (b"??", 23),
-    (b"^=", 152),
+    (b"^=", 151),
     (b"|=", 112),
     (b"|>", 113),
     (b"||", 13),
@@ -471,6 +469,5 @@ pub(crate) static CASTS: &[(&[u8], u16)] = &[
     (b"integer", 80),
     (b"object", 108),
     (b"string", 137),
-    (b"unset", 145),
-    (b"void", 149),
+    (b"void", 148),
 ];

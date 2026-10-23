@@ -354,7 +354,7 @@ fn lexer_edge_cases_phprs_017() {
         b"enum::X",
         b"( real )1",
         b"(\nint)1",
-        b"(unset)1",
+        // The same unset-cast input is retained in PHPRS-113 with PHP 8 lint rejection.
         b"(bool)1",
         b"( int )1",
         br#"`\u{110000}`"#,
@@ -857,5 +857,20 @@ fn late_static_class_targets_phprs_108() {
         if let Ok(tree) = result {
             common::verify_tree(&tree);
         }
+    }
+}
+
+#[test]
+fn removed_casts_rejected_phprs_113() {
+    for expression in ["(unset)1", "( UnSeT\t) $value", "(real)$value", "(REAL)1"] {
+        let source = format!("<?php {expression};");
+        assert!(
+            !php_accepts_with_args(source.as_bytes(), &["-n", "-l"]),
+            "{source}"
+        );
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
     }
 }

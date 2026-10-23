@@ -141,7 +141,6 @@
 %token T_TRAIT_C
 %token T_TRY
 %token T_UNSET
-%token T_UNSET_CAST
 %token T_USE
 %token T_VAR
 %token T_VARIABLE
@@ -418,7 +417,7 @@ reference_mark:
 ;
 cast_operator:
     T_INT_CAST | T_DOUBLE_CAST | T_STRING_CAST | T_ARRAY_CAST
-  | T_OBJECT_CAST | T_BOOL_CAST | T_UNSET_CAST
+  | T_OBJECT_CAST | T_BOOL_CAST
 ;
 postfix:
     atom

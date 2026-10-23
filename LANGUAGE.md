@@ -83,7 +83,9 @@ include/require/eval and language-defined expression forms. PHP 8.5 pipe and
 clone-call syntax belong to the current language contract. Pipe operands may be
 expressions; an arrow-function operand must be parenthesized, while callable
 validity depends on runtime values and stays outside syntax. Void casts are admitted
-where a value is discarded, not as value-producing expressions. Constant
+where a value is discarded, not as value-producing expressions. Removed real
+and unset casts are rejected; deprecated aliases still supported in PHP 8.5
+remain admitted. Constant
 expression legality that requires compile-time evaluation remains outside syntax.
 
 ## Statements and declarations

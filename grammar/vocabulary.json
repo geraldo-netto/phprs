@@ -154,7 +154,6 @@
     "T_TRAIT_C",
     "T_TRY",
     "T_UNSET",
-    "T_UNSET_CAST",
     "T_USE",
     "T_VAR",
     "T_VARIABLE",
@@ -296,7 +295,6 @@
     "integer": "T_INT_CAST",
     "object": "T_OBJECT_CAST",
     "string": "T_STRING_CAST",
-    "unset": "T_UNSET_CAST",
     "void": "T_VOID_CAST"
   },
   "compound_keywords": {

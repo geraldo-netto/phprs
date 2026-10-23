@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-113 | open | Remove the out-of-target unset cast | PHP type-juggling manual; PHP 8.x target | The grammar and vocabulary still admit `(unset)$value`, removed in PHP 8.0. Remove the cast production/spelling and retain failing-before/passing-after rejection fixtures; supported PHP 8.5 deprecated aliases remain language syntax. |
 | PHPRS-109 | open | Audit word/operator token classes and spans | PHPRS-092 | Compare a bounded contextual corpus of keywords, qualified names, magic names, casts and operators against public native token traces; retain exact class/span checks and invalid/truncated boundaries. |
 | PHPRS-110 | open | Audit numeric token boundaries | PHPRS-092 | Compare radix prefixes, separators, exponent forms and integer-overflow boundaries against native token traces; retain invalid forms and bounded boundary generation. |
 | PHPRS-111 | open | Audit string/interpolation token boundaries | PHPRS-092 | Compare quoted, binary, interpolated, heredoc and nowdoc classes/spans against native observations; retain context-switch, truncation and malformed-indent checks. |
