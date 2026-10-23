@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-110 | open | Audit numeric token boundaries | PHPRS-092 | Compare radix prefixes, separators, exponent forms and integer-overflow boundaries against native token traces; retain invalid forms and bounded boundary generation. |
 | PHPRS-111 | open | Audit string/interpolation token boundaries | PHPRS-092 | Compare quoted, binary, interpolated, heredoc and nowdoc classes/spans against native observations; retain context-switch, truncation and malformed-indent checks. |
 | PHPRS-112 | open | Audit source-tag and trivia boundaries | PHPRS-092 | Compare tags, HTML, whitespace, comment endings and halt payload behavior against native observations, with option-aware spans and bounded invalid prefixes. |
 | PHPRS-052 | open | Close the independent lexical audit | PHPRS-109, PHPRS-110, PHPRS-111, PHPRS-112 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |

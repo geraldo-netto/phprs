@@ -958,3 +958,58 @@ fn word_operator_traces_phprs_109() {
         assert_token_trace(source.as_bytes());
     }
 }
+
+#[test]
+fn numeric_token_boundaries_phprs_110() {
+    for literal in [
+        "0",
+        "00",
+        "0_7",
+        "0o7_7",
+        "0O77",
+        "0b10_01",
+        "0B1",
+        "0xCA_FE",
+        "0XFF",
+        "1.",
+        ".1",
+        "1.e2",
+        "1.0e+2",
+        "1_000.2_5E-1_0",
+        "0e8",
+        "09.1",
+        "09e2",
+        "9223372036854775807",
+        "9223372036854775808",
+        "18446744073709551615",
+        "18446744073709551616",
+        "0x7fff_ffff_ffff_ffff",
+        "0x8000_0000_0000_0000",
+        "0777777777777777777777",
+        "01000000000000000000000",
+        "1e9999",
+        "1e-9999",
+    ] {
+        let source = format!("<?php echo {literal};");
+        assert_token_trace(source.as_bytes());
+    }
+    for digits in 1..=70 {
+        let source = format!("<?php echo 0b{};", "1".repeat(digits));
+        assert_token_trace(source.as_bytes());
+    }
+}
+
+#[test]
+fn numeric_invalid_boundaries_phprs_110() {
+    for literal in [
+        "08", "09", "0_8", "0o8", "0b2", "0xG", "0x", "0o", "0b", "0x_1", "0b_1", "0o_1", "1__2",
+        "1_", "1e", "1e+", "1e_2", "1e+_2", "1._2", ".1_", "1e2_", "0x1_", "0o7_", "0b1_",
+    ] {
+        let source = format!("<?php echo {literal};");
+        assert!(!php_accepts(source.as_bytes()), "{source}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
