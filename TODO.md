@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-045 | open | Scan asymmetric property visibility | PHPRS-044 | Tokenize public(set), protected(set) and private(set) with exact case-insensitive spelling; preserve qualified names and property names; test promoted parameters, properties and malformed boundaries. |
 | PHPRS-046 | open | Parse void casts in admitted statement positions | PHPRS-044 | Scan (void) with PHP's tab/space rules; test statement and for-initializer/increment forms, rejecting expression/condition uses and malformed casts. |
 | PHPRS-047 | open | Verify pipe expressions and precedence | PHPRS-044 | Permanent positive/negative fixtures cover chained pipes, callable operands, precedence and malformed boundaries with source-spanned trees. |
 | PHPRS-054 | open | Verify clone and exit callable forms | PHPRS-044 | Cover named/unpacked/trailing/first-class argument forms and clone's parenthesis ambiguity; reject malformed argument lists without executing input. |
@@ -43,7 +42,7 @@
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
 | PHPRS-030 | deferred | Verify the hello world delivery | After syntax delivery and PHPRS-025 | Permanent automated tests run the file from README.md and assert exact stdout, empty stderr, and exit zero; rejection, file, and output-error tests pass offline. Mark hello world implemented only after these checks pass. |
-| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (141 Rust function/closure groups and 21 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
+| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (143 Rust function/closure groups and 21 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
 | PHPRS-035 | blocked | Measure SonarQube complexity per function | SonarQube Rust/Python analysis tooling is not installed locally | Produce SonarQube complexity values at most 9 for every new/changed production, test and tooling function, including heredoc_close_preserves_active_identity_phprs_034; record analyzer/tool versions and refactor any violations. Requires locally available supported analysis tooling or explicit owner authorization for necessary transfers; estimates and Clippy are not substitutes. |
 
 ## Control flow and callable code

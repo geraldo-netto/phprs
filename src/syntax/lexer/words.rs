@@ -60,7 +60,7 @@ impl Lexer<'_> {
 
     pub(super) fn contextual_word(&mut self, id: u16) -> Result<u16, Diagnostic> {
         if id != T_YIELD && id != T_ENUM {
-            return Ok(id);
+            return Ok(self.visibility_set(id));
         }
         let saved = self.position;
         while self.position < self.source.len() && self.skip_trivia()? {}
@@ -73,6 +73,24 @@ impl Lexer<'_> {
         let is_enum = enum_context(id, saved, self.position, following);
         self.position = saved;
         Ok(is_enum)
+    }
+
+    fn visibility_set(&mut self, id: u16) -> u16 {
+        let compound = match id {
+            T_PUBLIC => T_PUBLIC_SET,
+            T_PROTECTED => T_PROTECTED_SET,
+            T_PRIVATE => T_PRIVATE_SET,
+            _ => return id,
+        };
+        if !self
+            .rest()
+            .get(..5)
+            .is_some_and(|text| text.eq_ignore_ascii_case(b"(set)"))
+        {
+            return id;
+        }
+        self.position += 5;
+        compound
     }
 
     pub(super) fn property(&mut self) -> Option<u16> {
