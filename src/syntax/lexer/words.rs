@@ -162,10 +162,15 @@ fn enum_context(id: u16, start: usize, end: usize, following: &[u8]) -> u16 {
     if start == end || following.is_empty() {
         return T_STRING;
     }
-    if following.eq_ignore_ascii_case(b"extends") || following.eq_ignore_ascii_case(b"implements") {
+    if ascii_prefix(following, b"extends") || ascii_prefix(following, b"implements") {
         return T_STRING;
     }
     T_ENUM
+}
+
+fn ascii_prefix(word: &[u8], prefix: &[u8]) -> bool {
+    word.get(..prefix.len())
+        .is_some_and(|part| part.eq_ignore_ascii_case(prefix))
 }
 
 fn cast_kind(word: &[u8]) -> Option<u16> {

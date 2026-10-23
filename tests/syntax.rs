@@ -495,3 +495,55 @@ fn mutated_fixtures_match_php_phprs_032() {
     }
     assert!(failures.is_empty(), "{failures:?}");
 }
+
+#[test]
+fn enum_keyword_prefixes_phprs_039() {
+    let names: &[(&[u8], bool)] = &[
+        (b"extendsA", false),
+        (b"implementsA", false),
+        (b"extends_", false),
+        (b"implements_", false),
+        (b"ExTeNdSa", false),
+        (b"IMPLEMENTSX", false),
+        (b"extends\xff", false),
+        (b"implements\xff", false),
+        (b"extends", false),
+        (b"implements", false),
+        (b"extend", true),
+        (b"implement", true),
+        (b"extendsxSuffix", false),
+        (b"extendX", true),
+        (b"implementX", true),
+        (b"Xextends", true),
+        (b"Ximplements", true),
+        (b"\\extendsA", false),
+        (b"X", true),
+    ];
+    let separators: &[&[u8]] = &[b" ", b"\t", b"\r\n", b"/**/", b"/*x*/", b"//x\n", b"#x\n"];
+    for &(name, expected) in names {
+        for &separator in separators {
+            let source = [b"<?php enum".as_slice(), separator, name, b" {}"].concat();
+            assert_eq!(php_accepts(&source), expected, "oracle: {source:?}");
+            assert_eq!(
+                PhpParser.parse(&source, DEFAULT_OPTIONS).is_ok(),
+                expected,
+                "{source:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn enum_keyword_prefix_truncations_phprs_039() {
+    for name in [b"extends".as_slice(), b"implements"] {
+        for end in 0..name.len() {
+            let source = [b"<?php enum ".as_slice(), &name[..end], b" {}"].concat();
+            let expected = php_accepts(&source);
+            assert_eq!(
+                PhpParser.parse(&source, DEFAULT_OPTIONS).is_ok(),
+                expected,
+                "{source:?}"
+            );
+        }
+    }
+}
