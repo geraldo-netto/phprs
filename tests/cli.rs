@@ -1,0 +1,25 @@
+#[test]
+fn binary_checks_without_execution_phprs_018() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))
+        .args(["--check", "examples/hello.php"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert_eq!(output.stdout, b"Syntax OK\n");
+    assert!(output.stderr.is_empty());
+}
+
+#[test]
+fn binary_reports_syntax_errors_phprs_018() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_phprs"))
+        .args(["--check", "tests/fixtures/invalid.php"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert!(
+        String::from_utf8(output.stderr)
+            .unwrap()
+            .contains("byte 11")
+    );
+}

@@ -1,0 +1,475 @@
+use phprs::{
+    contracts::{DEFAULT_LIMITS, DEFAULT_OPTIONS, ErrorKind, ParseOptions, SyntaxKind, SyntaxTree},
+    parse,
+};
+
+const VALID: &[(&str, &[u8])] = &[
+    ("empty", b""),
+    ("html", b"<html>outside PHP</html>"),
+    ("tag", b"<?php"),
+    ("hello", include_bytes!("../examples/hello.php")),
+    ("tags", b"one <?= 1 ?> two <?PHP echo 2 ?> three <?php ;"),
+    ("comments", b"#!/usr/bin/php\n<?php // one\n# two\n/** three */ echo 1; // ?>html"),
+    ("literals", b"<?php $x=[0,123,1_000,012,0o77,0xCA_FE,0B101,1.,.25,1.2e-3,1E+3,9223372036854775808];"),
+    ("strings", br#"<?php echo '', 'a\'b', "", b'binary', B"binary", "a\"b", "escaped\$name";"#),
+    ("operators", b"<?php $a=1+2*3**4; $a+=1; $a-=1; $a*=2; $a/=2; $a%=2; $a**=2; $a.=1; $a<<=1; $a>>=1; $a&=1; $a|=1; $a^=1; $a??=1; ++$a; $a--; $b=~$a; $c=!$b; $x=$a<>$b; $x=$a<=>$b;"),
+    ("precedence", b"<?php $x = 1 | 2 ^ 3 & 4; $x = $a && $b || $c; $x=$a and $b xor $c or $d; $x=$a??$b; $x=$a?$b:$c; $x=$a?:$c; $x=@foo();"),
+    ("comparison", b"<?php $x=$a==$b; $x=$a!=$b; $x=$a===$b; $x=$a!==$b; $x=$a<$b; $x=$a<=$b; $x=$a>$b; $x=$a>=$b; $x=$a<<2; $x=$a>>2;"),
+    ("control", b"<?php if($a){echo 1;}elseif($b)echo 2;else echo 3; while($a){break;} do{continue;}while($a); for($i=0;$i<2;$i++){echo $i;} foreach($a as $k=>&$v){} switch($a){case 1:break;default:;} goto label; label:;"),
+    ("alternative", b"<?php if(1):echo 1;elseif(2):echo 2;else:echo 3;endif; while(0):endwhile; for(;;):break;endfor; foreach([] as $v):endforeach; switch(1):case 1:break;default:;endswitch; declare(ticks=1):echo 1;enddeclare;"),
+    ("functions", b"<?php function &f(?int &$x, string ...$args): int|string { global $a, ${$b}; static $n=0; return $x; } $f = static function($x) use (&$a,$b) { return $x; }; $g=static fn($x):int=>$x+1; f(x:1); f(...[1]); $f=f(...);"),
+    ("exceptions", b"<?php try { throw new Exception(); } catch (RuntimeException|LogicException $e) {} catch (Throwable) {} finally {}"),
+    ("namespaces", b"<?php namespace A\\B; use C\\D; use function C\\f; use const C\\X; use C\\{D, E as F, function f, const X}; const X=1,Y=2; function f(){return \\C\\f()+namespace\\X;}"),
+    ("namespace_blocks", b"<?php namespace A { function f(){} } namespace { A\\f(); }"),
+    ("objects", b"<?php #[A(1)] readonly class C extends B implements I,J { public const string X='x'; public function __construct(public int $x=1) {} final public function f():static { return $this; } } interface I extends J { public function f(); } trait T { protected int $x; }"),
+    ("trait_adaptations", b"<?php class C { use A,B { A::f insteadof B; B::f as protected alias; f as private; } var $x=1,$y=2; private static $z; }"),
+    ("enums", b"<?php enum Suit:string implements I { case Hearts='h'; public function f(){} } enum Plain { case A; } function enum(){} enum();"),
+    ("types", b"<?php function f((A&B)|C $a, A&B $b): (A&B)|null {} abstract class C { abstract protected function f(): never; }"),
+    ("anonymous", b"<?php $x=new class(1) extends C implements I { public function f(){} }; $x?->f(); $x->class; C::class; C::$p; $x->{$name}; ${$name}=1; $$name=2;"),
+    ("arrays", b"<?php $a=array(1,'x'=>&$v,...$b); [$x,,$y]=$a; list($x,list($y))=$a; $a[0]=1; unset($a[0],$b,); isset($a,$b,); empty($a);"),
+    ("match", b"<?php $x=match($v){1,2=>'a',default=>'b',};"),
+    ("generators", b"<?php function f(){yield; yield 1; yield 'x'=>2; yield from /* c */ $a;}"),
+    ("builtins", b"<?php include 'a'; include_once 'b'; require 'c'; require_once 'd'; eval(''); print 1; exit; die(); $x=(int)$a; $x=(integer)$a; $x=(float)$a; $x=(double)$a; $x=(string)$a; $x=(binary)$a; $x=(bool)$a; $x=(boolean)$a; $x=(array)$a; $x=(object)$a;"),
+    ("interpolation", br#"<?php echo "$name $a[key] $a[0] $a[-1] $a[$i] $o->class $o?->x {$a['key']} ${name} ${name[0]} ${$name}";"#),
+    ("nested_interpolation", br#"<?php echo "{$o->f("{$x}")}"; echo `echo $name`; echo ``;"#),
+    ("heredoc", b"<?php $s=<<<TEXT\nhello $name {$o->p}\nTEXT;\n$s=<<<'RAW'\n$no_interpolation\nRAW;\n"),
+    ("heredoc_indent", b"<?php $s=<<<\"TEXT\"\r\n  hello\r\n  TEXT;\n$s=<<<EMPTY\nEMPTY;"),
+    ("binary_heredoc", b"<?php $s=b<<<END\nbody\nEND; $s=B<<<'RAW'\nbody\nRAW;"),
+    ("magic", b"<?php echo __LINE__,__FILE__,__DIR__,__CLASS__,__TRAIT__,__METHOD__,__FUNCTION__,__NAMESPACE__;"),
+    ("halt", b"<?php __halt_compiler(); arbitrary\x00\xff payload '"),
+    ("binary_bytes", b"<?php $\xff='\x00\xfe'; echo $\xff;"),
+];
+
+const INVALID: &[&[u8]] = &[
+    b"<?php echo;",
+    b"<?php echo 'x'",
+    b"<?php echo 'unclosed;",
+    b"<?php echo \"unclosed;",
+    b"<?php /* unclosed",
+    b"<?php $x = ;",
+    b"<?php if () {}",
+    b"<?php function f( {}",
+    b"<?php class {}",
+    b"<?php echo 0x;",
+    b"<?php echo 08;",
+    b"<?php echo 1__2;",
+    b"<?php echo 1._2;",
+    b"<?php echo 1e+;",
+    b"<?php echo \x00;",
+    b"<?php }",
+    b"<?php {",
+    b"<?php echo \"${\";",
+    b"<?php echo \"$a[ ]\";",
+    b"<?php echo \"$a[foo bar]\";",
+    b"<?php $s=<<<EOF\nmissing;",
+    b"<?php $s=<<<'EOF\nEOF;",
+    b"<?php $s=<<<EOF invalid\nEOF;",
+    b"<?php $s=<<<EOF\nless\n  EOF;",
+    b"<?php $s=<<<EOF\n \tmixed\n \tEOF;",
+    b"<?php $x=(real)1;",
+    b"<?php function f(){__halt_compiler();}",
+    b"<?php $a=[1,2;",
+    b"<?php match(1){default=>};",
+    b"<?php echo 1 2;",
+];
+
+fn verify_tree(tree: &SyntaxTree<'_>) {
+    assert!(
+        matches!(tree.nodes[tree.root].kind, SyntaxKind::Rule("start")),
+        "root: {:?}",
+        tree.nodes[tree.root]
+    );
+    assert_eq!(tree.nodes[tree.root].span, 0..tree.source.len());
+    for (index, node) in tree.nodes.iter().enumerate() {
+        assert!(node.span.start <= node.span.end, "{node:?}");
+        assert!(node.span.end <= tree.source.len());
+        for &child in &tree.edges[node.children.clone()] {
+            assert!(child < index);
+        }
+    }
+}
+
+#[test]
+fn php83_language_families_phprs_010() {
+    let mut failures = Vec::new();
+    for &(name, source) in VALID {
+        match parse(source, DEFAULT_OPTIONS) {
+            Ok(tree) => verify_tree(&tree),
+            Err(error) => failures.push(format!("{name}: {error:?}")),
+        }
+    }
+    assert!(failures.is_empty(), "{failures:#?}");
+}
+
+#[test]
+fn malformed_syntax_phprs_012() {
+    for &source in INVALID {
+        assert!(
+            parse(source, DEFAULT_OPTIONS).is_err(),
+            "accepted {source:?}"
+        );
+    }
+}
+
+#[test]
+fn limits_phprs_002() {
+    let source = b"<?php echo 'hello';";
+    let mut limits = DEFAULT_LIMITS;
+    limits.source_bytes = source.len() - 1;
+    assert_eq!(
+        parse(
+            source,
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits = DEFAULT_LIMITS;
+    limits.tokens = 0;
+    assert_eq!(
+        parse(
+            source,
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits = DEFAULT_LIMITS;
+    limits.nodes = 0;
+    assert_eq!(
+        parse(
+            b"",
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits = DEFAULT_LIMITS;
+    limits.stack = 0;
+    assert_eq!(
+        parse(
+            b"",
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits.stack = 1;
+    assert_eq!(
+        parse(
+            source,
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits.stack = 3;
+    assert_eq!(
+        parse(
+            b"<?php {{{{{{",
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+    limits = DEFAULT_LIMITS;
+    limits.source_bytes = source.len();
+    verify_tree(
+        &parse(
+            source,
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            },
+        )
+        .unwrap(),
+    );
+}
+
+#[test]
+fn every_fixture_truncation_is_safe_phprs_032() {
+    for &(_, source) in VALID {
+        for end in 0..=source.len() {
+            if let Ok(tree) = parse(&source[..end], DEFAULT_OPTIONS) {
+                verify_tree(&tree);
+            }
+        }
+    }
+}
+
+#[test]
+fn bounded_byte_inputs_are_safe_phprs_032() {
+    let mut seed = 0x5eed_u64;
+    for length in 0..128 {
+        for _ in 0..32 {
+            let mut source = b"<?php ".to_vec();
+            for _ in 0..length {
+                seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                source.push((seed >> 32) as u8);
+            }
+            if let Ok(tree) = parse(&source, DEFAULT_OPTIONS) {
+                verify_tree(&tree);
+            }
+        }
+    }
+}
+
+struct OracleChild(std::process::Child);
+
+impl Drop for OracleChild {
+    fn drop(&mut self) {
+        if !matches!(self.0.try_wait(), Ok(Some(_))) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+}
+
+fn php_accepts(source: &[u8]) -> bool {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    let child = Command::new("php").args(["-r", "try { token_get_all(stream_get_contents(STDIN), TOKEN_PARSE); } catch (Throwable $e) { exit(1); }"])
+        .stdin(Stdio::piped()).stdout(Stdio::null()).stderr(Stdio::null()).spawn().expect("local PHP oracle required");
+    let mut owned = OracleChild(child);
+    owned.0.stdin.take().unwrap().write_all(source).unwrap();
+    owned.0.wait().unwrap().success()
+}
+
+#[test]
+fn differential_fixtures_phprs_032() {
+    for &(name, source) in VALID {
+        assert!(php_accepts(source), "oracle rejected {name}");
+    }
+    for &source in INVALID {
+        assert!(!php_accepts(source), "oracle accepted {source:?}");
+    }
+}
+
+#[test]
+fn sparse_symbol_numbers_phprs_014() {
+    let tree = parse(b"", DEFAULT_OPTIONS).unwrap();
+    assert_eq!(tree.nodes[tree.root].kind, SyntaxKind::Rule("start"));
+    assert!(parse(b"<?php function f(){__halt_compiler();}", DEFAULT_OPTIONS).is_err());
+}
+
+#[test]
+fn compound_ampersand_phprs_015() {
+    assert!(parse(b"<?php $a &= 1;", DEFAULT_OPTIONS).is_ok());
+}
+
+#[test]
+fn nested_string_modes_phprs_016() {
+    assert!(parse(br#"<?php echo "{$o->f("{$x}")}";"#, DEFAULT_OPTIONS).is_ok());
+}
+
+#[test]
+fn lexer_edge_cases_phprs_017() {
+    let expressions: &[&[u8]] = &[
+        br#""\u{}""#,
+        br#""\u{110000}""#,
+        br#""\u{ffffffffffff}""#,
+        br#""\u{41}""#,
+        br#""\u{d800}""#,
+        br#""\u{nothex}""#,
+        br#""\u{41""#,
+        br#""\u41""#,
+        br#"'\u{}'"#,
+        br#""$a[0x10]""#,
+        br#""$a[0b10]""#,
+        br#""$a[0o10]""#,
+        br#""$a[1_0]""#,
+        br#""$a[01]""#,
+        br#""$a[-0x1]""#,
+        br#""$a[0x]""#,
+        br#""$a[1__0]""#,
+        br#""$a[1.0]""#,
+        b"1_000",
+        b"0_7",
+        b"0_8",
+        b"0xFF_FF",
+        b"0b10_10",
+        b"0o7_7",
+        b"0x_1",
+        b".1_2",
+        b"._1",
+        b"1._0",
+        b"1.0_1",
+        b"1.e2",
+        b"1e1_0",
+        b"0xFFFFFFFFFFFFFFFF",
+        b"0x10000000000000000",
+        b"18446744073709551616",
+        b"$o->match",
+        b"$o-> /* comment */ match",
+        b"$o->\nmatch",
+        b"$o?->match",
+        b"C::class",
+        b"C::{foo()}",
+        b"enum()",
+        b"new enum",
+        b"enum::X",
+        b"( real )1",
+        b"(\nint)1",
+        b"(unset)1",
+        b"(bool)1",
+        b"( int )1",
+        br#"`\u{110000}`"#,
+        br#""${foo()}""#,
+        br#""{$o->{'x'}}""#,
+    ];
+    let mut failures = Vec::new();
+    for &expression in expressions {
+        let source = [b"<?php echo ".as_slice(), expression, b";"].concat();
+        let expected = php_accepts(&source);
+        let actual = parse(&source, DEFAULT_OPTIONS).is_ok();
+        if actual != expected {
+            failures.push((expression, expected, actual));
+        }
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}
+
+#[test]
+fn tree_conservation_and_spans_phprs_019() {
+    for &(_, source) in VALID {
+        let tree = parse(source, DEFAULT_OPTIONS).unwrap();
+        let mut parents = vec![0; tree.nodes.len()];
+        for node in &tree.nodes {
+            for &child in &tree.edges[node.children.clone()] {
+                parents[child] += 1;
+                let span = &tree.nodes[child].span;
+                assert!(
+                    node.span.start <= span.start && span.end <= node.span.end,
+                    "parent {node:?}, child {:?}",
+                    tree.nodes[child]
+                );
+            }
+        }
+        parents[tree.root] += 1;
+        assert!(
+            parents.iter().all(|&count| count == 1),
+            "unowned or multiply owned tree nodes: {parents:?}"
+        );
+    }
+}
+
+#[test]
+fn short_tag_configuration_phprs_012() {
+    let options = ParseOptions {
+        short_open_tags: true,
+        ..DEFAULT_OPTIONS
+    };
+    let source = b"<? echo 1; ?>html <?php echo 2;";
+    let tree = parse(source, options).unwrap();
+    verify_tree(&tree);
+    assert!(
+        tree.nodes
+            .iter()
+            .any(|node| node.kind == SyntaxKind::Token("T_ECHO"))
+    );
+    assert!(parse(b"<? echo ;", DEFAULT_OPTIONS).is_ok());
+    assert!(parse(b"<? echo ;", options).is_err());
+    assert!(parse(b"<?phpX;", options).is_ok());
+    assert!(parse(b"<?=1?>", options).is_ok());
+}
+
+#[test]
+fn deep_input_uses_bounded_heap_stacks_phprs_002() {
+    let mut source = b"<?php echo ".to_vec();
+    source.extend(std::iter::repeat_n(b'(', 4096));
+    source.extend_from_slice(b"1");
+    source.extend(std::iter::repeat_n(b')', 4096));
+    source.push(b';');
+    verify_tree(&parse(&source, DEFAULT_OPTIONS).unwrap());
+    let limits = phprs::contracts::Limits {
+        stack: 32,
+        ..DEFAULT_LIMITS
+    };
+    assert_eq!(
+        parse(
+            &source,
+            ParseOptions {
+                limits,
+                ..DEFAULT_OPTIONS
+            }
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::Limit
+    );
+}
+
+#[test]
+fn heredoc_interpolation_boundaries_phprs_023() {
+    let sources: &[&[u8]] = &[
+        b"<?php $s=<<<OUT\n{$o->f(\"\nOUT\n\")}\nOUT;",
+        b"<?php $s=<<<OUT\n  {$o->f(\"\nunindented\n\")}\n  OUT;",
+        b"<?php $s=<<<OUT\n{$o->f(<<<OUT\ninner\nOUT\n)}\nOUT;",
+    ];
+    for &source in sources {
+        assert!(php_accepts(source), "invalid independent fixture");
+        assert!(parse(source, DEFAULT_OPTIONS).is_ok(), "{source:?}");
+    }
+}
+
+fn mutate_fixture(source: &[u8], step: usize) -> Vec<u8> {
+    let mut changed = source.to_vec();
+    let index = (step * 31 + source.len() / 2) % (source.len() + 1);
+    let byte = b"};($\0\"\\"[step % 7];
+    if index == source.len() {
+        changed.push(byte);
+        return changed;
+    }
+    match step % 3 {
+        0 => {
+            changed[index] = byte;
+        }
+        1 => {
+            changed.remove(index);
+        }
+        _ => {
+            changed.insert(index, byte);
+        }
+    }
+    changed
+}
+
+#[test]
+fn mutated_fixtures_match_php_phprs_032() {
+    let mut failures = Vec::new();
+    for &(name, source) in VALID {
+        for step in 0..9 {
+            let changed = mutate_fixture(source, step);
+            let expected = php_accepts(&changed);
+            let actual = parse(&changed, DEFAULT_OPTIONS).is_ok();
+            if actual != expected {
+                failures.push((name, step, changed, expected, actual));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{failures:?}");
+}

@@ -4,22 +4,19 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-001 | open | Establish the minimal Rust package and hello world fixture | None | One package with no third-party dependencies builds offline; `examples/hello.php` matches README.md. |
-| PHPRS-002 | open | Define the first supported syntax and execution contract | None | Independent statement and error types define accepted bytes, whitespace, escape handling, input/output bounds, and clean rejection of unsupported syntax. |
 | PHPRS-003 | deferred | Select the production compatibility profile | Revisit after PHPRS-030 | Select a pinned PHP version, integer/platform assumptions, representative applications, extensions, and measurable release criteria before expanding production claims. |
 
 ## Syntax and parsing
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-010 | open | Parse the hello world PHP subset | PHPRS-001, PHPRS-002 | Parse an opening tag, whitespace, one `echo`, a double-quoted byte literal with `\n`, and a semicolon into the independent statement type; reject malformed, truncated, oversized, and trailing unsupported input without panicking. |
-| PHPRS-011 | deferred | Expand literals and statement syntax | Revisit after PHPRS-030 | Choose the next executable example; specify and test its required single quotes, escapes, comments, closing tags, interpolation, or multiple statements before adding them. |
+| PHPRS-010 | in_progress | Finish the PHP 8.3 syntax delivery gate | PHPRS-031 | Retain the implemented source-spanned parser, pinned grammar, passing language-family/differential/invalid-input corpus and CLI; close the remaining function-quality evidence before declaring the syntax stage verified. Execution remains deferred. |
 
 ## Execution and values
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-020 | open | Evaluate one echo statement | PHPRS-002 | Produce the exact contracted output bytes independently of parser and OS internals; enforce output bounds and test output failure handling at the host boundary. |
+| PHPRS-020 | deferred | Evaluate one echo statement | After syntax delivery; execution is explicitly deferred | Produce the exact contracted output bytes independently of parser and OS internals; enforce output bounds and test output failure handling at the host boundary. |
 | PHPRS-021 | deferred | Add scalar values, variables, and expressions | Revisit after PHPRS-030 | Select a small program, define evaluation order and coercions against the chosen PHP profile, and pass permanent semantic and invalid-input tests. |
 | PHPRS-022 | deferred | Add arrays, references, and managed resources | After PHPRS-021; activate only when a selected example requires them | Define ownership, copy-on-write and aliasing behavior, cycle handling, destructor order, rooting, cleanup, and identity reuse; validate bounded models and runtime regressions before use. |
 
@@ -27,16 +24,17 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-025 | open | Run a source file and report failures | PHPRS-010, PHPRS-020 | The planned command in README.md reads one file and writes exact stdout bytes; missing arguments, unreadable files, invalid programs, and output failures produce stderr diagnostics and nonzero exit status. |
+| PHPRS-025 | deferred | Run a source file and report failures | After syntax delivery and PHPRS-020 | The planned execution command in README.md reads one file and writes exact stdout bytes; missing arguments, unreadable files, invalid programs, and output failures produce stderr diagnostics and nonzero exit status. |
 | PHPRS-026 | deferred | Add PHP CLI options and configuration | Revisit after PHPRS-030 | Implement only the options required by the next selected programs, with explicit configuration precedence and platform-independent contracts. |
 
 ## Tests and delivery evidence
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-030 | open | Verify the hello world delivery | PHPRS-025, PHPRS-031 | Permanent automated tests run the file from README.md and assert exact stdout, empty stderr, and exit zero; rejection, file, and output-error tests pass offline. Mark hello world implemented only after these checks pass. |
-| PHPRS-031 | open | Verify function quality and resource boundaries | Alongside PHPRS-010, PHPRS-020, PHPRS-025; required before declaring their quality checks complete | Measure at least 80 percent executable-line coverage per production function and SonarQube complexity at most 9 per new/changed function; test bounded invalid inputs and review ownership/cleanup. SonarQube tooling is not installed locally: record actual missing evidence rather than substituting estimates, and obtain transfer authorization before acquiring tools. |
-| PHPRS-032 | deferred | Grow the PHP conformance corpus | Revisit after PHPRS-030 and PHPRS-003 | Add version-pinned differential fixtures and independent expected results for each new feature; preserve diagnostics, exit status, and side effects, and investigate oracle disagreements. |
+| PHPRS-030 | deferred | Verify the hello world delivery | After syntax delivery and PHPRS-025 | Permanent automated tests run the file from README.md and assert exact stdout, empty stderr, and exit zero; rejection, file, and output-error tests pass offline. Mark hello world implemented only after these checks pass. |
+| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (139 Rust function/closure groups and 20 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
+| PHPRS-035 | blocked | Measure SonarQube complexity per function | SonarQube Rust/Python analysis tooling is not installed locally | Produce SonarQube complexity values at most 9 for every new/changed production, test and tooling function, including heredoc_close_preserves_active_identity_phprs_034; record analyzer/tool versions and refactor any violations. Requires locally available supported analysis tooling or explicit owner authorization for necessary transfers; estimates and Clippy are not substitutes. |
+| PHPRS-036 | open | Normalize whitespace in the derived grammar | tools/generate_parser.py grammar extraction | Staged git diff --check reports trailing whitespace and mixed indentation in grammar/syntax.y, inherited from action removal and upstream text. Normalize generated whitespace and retain offline generation reproducibility; preserve the pinned upstream bytes, including their existing mixed indentation at zend_language_parser.y:413. |
 
 ## Control flow and callable code
 

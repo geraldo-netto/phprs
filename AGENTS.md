@@ -2,15 +2,15 @@
 
 ## Delivery scope
 
-- Seek the smallest independently runnable delivery. The current goal is the
-  hello world program and acceptance conditions in README.md.
+- Seek the smallest independently verifiable delivery. The current stage is
+  full PHP syntax support; execution and all other runtime work come later.
 - The long-term goal is a production replacement for PHP. Do not introduce
   infrastructure or language features solely for a later milestone.
 - Keep proposed, implemented, and verified behavior clearly distinguished.
 - Keep TODO.md organized as one feature table per domain. Every feature needs a
   stable ID, disposition, explicit dependencies, and a verifiable completion
   condition. Remove completed entries; preserve deliberate deferrals.
-- Reassess the next smallest executable example after each delivery. Deferred
+- Reassess the next smallest verifiable example after each delivery. Deferred
   features do not automatically become active work.
 
 ## Implementation quality

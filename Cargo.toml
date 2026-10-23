@@ -1,0 +1,8 @@
+[package]
+name = "phprs"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "PHP syntax support in Rust"
+
+[dependencies]

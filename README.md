@@ -1,62 +1,97 @@
 # phprs
 
-A PHP runtime written in Rust, with a long-term goal of becoming a production
-replacement for PHP. The first delivery is deliberately small: run a PHP hello
-world program.
+A PHP implementation in Rust, with a long-term goal of becoming a production
+replacement for PHP. The current stage is PHP syntax support. The working tree
+implements a byte-oriented lexer, a parser derived from the PHP 8.3.6 grammar,
+and a syntax-checking CLI. Execution remains deferred.
 
-Status: planning. No interpreter is implemented yet.
+## Check a file
 
-## First delivery
+```sh
+cargo run --offline -- --check examples/hello.php
+```
 
-Run this program from a file:
+For the checked-in example:
 
 ```php
 <?php
 echo "Hello, world!\n";
 ```
 
-The planned command is:
+The checker prints exactly `Syntax OK` followed by a newline, leaves stderr
+empty, and exits zero. It parses the file without running its statements.
+Missing or extra arguments, file/read errors, rejected syntax, exhausted parser
+limits, and stdout failures return status 1 with a diagnostic on stderr when
+that stream is writable. Syntax diagnostics report byte offsets.
+
+The parser handles tags and HTML, expressions, statements, callable and object
+syntax, types, attributes, enums, interpolation, heredoc/nowdoc and namespaces.
+Its tables preserve the upstream grammar's productions and precedence. This is
+syntax acceptance, not PHP semantic validation, name resolution, compilation,
+or runtime compatibility. Tests cover representative language families and a
+bounded invalid-input corpus; they do not establish equivalence for all inputs.
+The production compatibility profile is still undecided.
+
+## Contracts and ownership
+
+`src/contracts.rs` defines source spans, syntax nodes, diagnostics and per-call
+limits independently of parser storage algorithms or host APIs. `parse` accepts
+source bytes and options and returns a concrete syntax tree or a diagnostic.
+The tree borrows the source and owns flat node/edge vectors; it cannot outlive
+that source. Every non-root node has one parent; child spans lie within parent
+spans. EOF is excluded from tree storage. Trivia is retained in source bytes,
+not as separate nodes. Quoted token spelling is available through source spans;
+escapes are checked where required but values are not evaluated.
+
+The default limits are 1,048,576 source bytes, 262,144 tokens, 2,000,000 nodes,
+and 65,536 entries in each parser/lexer stack. Long and echo tags are enabled;
+short tags are opt-in through `ParseOptions`. The CLI uses the defaults and reads
+at most the source limit plus one byte to detect oversized files.
+
+Each parse owns its lexer frames, heredoc contexts and parser workspace. Contexts
+are referenced by indices while active; nested heredocs settle in stack order
+before an index can be reused. Parsing is synchronous, with no callbacks or
+background work. On success the tree moves to the caller; temporary workspaces
+are dropped. On rejection or allocation failure all invocation-owned vectors
+are dropped. The CLI owns the file and source buffer for the call. Flat storage
+avoids recursive destruction on deeply nested input. Tests cover tree ownership,
+stack limits, malformed bytes, truncation and out-of-order heredoc closure;
+these bounded checks do not prove unrestricted resource safety.
+
+## Offline verification
+
+Builds use one Rust package with no third-party dependencies. With the installed
+Rust tools, PHP 8.3.6, Python 3 and GNU Bison:
 
 ```sh
-cargo run --offline -- examples/hello.php
+cargo test --offline
+cargo fmt --check
+cargo clippy --offline --all-targets -- -D warnings
+cargo llvm-cov --offline --all-targets --json --output-path target/coverage.json
+python3 tools/check_coverage.py
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Success means stdout contains exactly `Hello, world!` followed by a newline,
-stderr is empty, and the process exits with status zero. Invalid syntax and
-unreadable files must fail cleanly. This command becomes available when the first
-delivery is implemented.
+The Python suite consumes the fresh LLVM coverage report, so run those commands
+in order. The differential tests use local PHP's `token_get_all` with
+`TOKEN_PARSE`; they never execute the checked source. See
+[grammar/README.md](grammar/README.md) for source identity, licensing notices and
+offline table regeneration.
 
-## Implementation plan
+Verification on 2026-10-23 passes 29 Rust tests and 15 Python tests, including
+4,096 generated malformed-byte cases, every prefix of the positive fixtures,
+PHP acceptance comparisons and deterministic generation of 1,121 states and
+586 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
+each measured production Rust function/closure. SonarQube complexity measurement
+is unavailable locally; its required evidence remains outstanding in
+[TODO.md](TODO.md). No full syntax-stage quality sign-off or production support
+is claimed. Native CLI validation has been performed on Linux only.
 
-Start with one Rust package and no third-party dependencies. Keep parsing,
-execution, and host file/process operations in focused modules with explicit
-inputs and outputs. Parse into an independently defined statement type; execution
-must not depend on parser internals or OS APIs.
+## Later deliveries
 
-For the first delivery, recognize the PHP opening tag, whitespace, one `echo`
-statement, a double-quoted literal containing ordinary bytes and `\n`, and its
-semicolon. Use a direct evaluator for that statement. Define accepted input and
-output bounds and reject unsupported syntax explicitly. Variables, interpolation,
-multiple statements, closing tags, and additional escapes come later.
-
-Keep program bytes and output bytes distinct from host path handling. The CLI
-owns the source buffer and output destination; parsed data cannot outlive its
-source, and all resources settle when the invocation ends. No shared heap,
-garbage collector, bytecode compiler, or JIT is needed for this delivery.
-
-Add a permanent automated acceptance test for the exact program and output, plus
-invalid-input and file-error tests. PHP 8.3.6 is available locally as an initial
-comparison oracle; the production compatibility version remains a later decision.
-Use offline builds and checks without fetching dependencies.
-
-## Roadmap
-
-[TODO.md](TODO.md) groups features by domain and records dependencies and delivery
-conditions. Finish the hello world gate before expanding the language. Choose
-each subsequent increment from a small executable PHP example and its tests.
-
-Production support will eventually require a selected PHP version, application
-and extension compatibility, correct resource ownership, native platform
-validation, operational acceptance, and measured performance. The deferred
-features are planning candidates, not implemented capabilities or fixed delivery
-dates.
+Execution starts with the hello world example only after syntax delivery. Its
+planned command is `cargo run --offline -- examples/hello.php`, with exact output
+`Hello, world!` followed by a newline, empty stderr and exit zero. That execution
+command is not implemented. Values, extensions, hosting and production release
+criteria remain deliberately deferred in the feature tables in
+[TODO.md](TODO.md).
