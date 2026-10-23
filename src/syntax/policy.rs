@@ -1,4 +1,5 @@
 //! Syntax-shape checks over independent tree contracts, without parser state.
+mod hooks;
 use crate::contracts::{Diagnostic, ErrorKind, SyntaxKind, SyntaxNode};
 use std::ops::Range;
 
@@ -6,6 +7,7 @@ use std::ops::Range;
 /// Views never escape validation. Indices must decrease during wrapper traversal;
 /// malformed wrapper paths reject, so traversal is bounded by node count.
 pub(super) struct NodeView<'tree> {
+    pub source: &'tree [u8],
     pub nodes: &'tree [SyntaxNode],
     pub edges: &'tree [usize],
 }
@@ -34,7 +36,7 @@ impl NodeView<'_> {
         }
     }
 
-    fn next_modifier_prefix(
+    fn next_prefix(
         &self,
         indices: &[usize],
         bound: usize,
@@ -67,7 +69,7 @@ impl NodeView<'_> {
             return Err(());
         }
         let name = self.token(entry).ok_or(())?;
-        let next = self.next_modifier_prefix(indices, bound)?;
+        let next = self.next_prefix(indices, bound)?;
         Ok(Some(ModifierStep { name, next }))
     }
 
@@ -126,6 +128,9 @@ pub(super) fn validate_rule(
     view: NodeView<'_>,
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
+    if rule == "hooks" {
+        return hooks::validate(&view, children);
+    }
     if rule == "expression" {
         return validate_expression(&view, children);
     }
@@ -260,6 +265,7 @@ mod tests {
             let result = validate_rule(
                 "member_modifiers",
                 NodeView {
+                    source: b"",
                     nodes: &nodes,
                     edges: &edges,
                 },
@@ -282,6 +288,7 @@ mod tests {
                 validate_rule(
                     "member_modifiers",
                     NodeView {
+                        source: b"",
                         nodes: &nodes,
                         edges: &edges
                     },
@@ -300,6 +307,7 @@ mod tests {
             validate_rule(
                 "member_modifiers",
                 NodeView {
+                    source: b"",
                     nodes: &nodes,
                     edges: &edges
                 },
@@ -308,10 +316,11 @@ mod tests {
             .is_err()
         );
         let view = NodeView {
+            source: b"",
             nodes: &[],
             edges: &[],
         };
-        assert!(view.next_modifier_prefix(&[0, 1], 1).is_err());
+        assert!(view.next_prefix(&[0, 1], 1).is_err());
     }
 
     #[test]
@@ -329,6 +338,7 @@ mod tests {
                 children,
             }];
             let view = NodeView {
+                source: b"",
                 nodes: &nodes,
                 edges: &edges,
             };
@@ -337,6 +347,7 @@ mod tests {
             assert!(validate_rule("prefix_mutation", view, 0..edges.len()).is_err());
         }
         let view = NodeView {
+            source: b"",
             nodes: &[],
             edges: &[],
         };

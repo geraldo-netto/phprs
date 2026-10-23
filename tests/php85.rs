@@ -453,3 +453,22 @@ fn property_magic_token_phprs_049() {
         );
     }
 }
+
+#[test]
+fn hook_name_rejections_phprs_104() {
+    for hooks in [
+        "get; get;",
+        "get; &get;",
+        "&get; get;",
+        "set; set;",
+        "get => 1; get => 2;",
+        "fetch => 1;",
+        "getter;",
+    ] {
+        let source = format!("<?php abstract class C {{ public $x {{ {hooks} }} }}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

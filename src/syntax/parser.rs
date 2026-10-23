@@ -116,6 +116,7 @@ impl<'source> Parser<'source> {
         validate_rule(
             SYMBOL_NAMES[usize::from(symbol)],
             NodeView {
+                source: self.tree.source,
                 nodes: &self.tree.nodes,
                 edges: &self.tree.edges,
             },

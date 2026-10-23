@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-104 | open | Validate property-hook names and duplicate hooks | PHPRS-049; PHP property-hook manual | The grammar admits `get; get;`, `get; &get;` and arbitrary hook names. Validate the documented get/set names and uniqueness from source spans, distinguishing syntax restrictions from compiler checks; retain permanent failing-before/passing-after tests. |
 | PHPRS-052 | open | Audit lexical behavior against independent contracts | PHPRS-092 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |
 | PHPRS-101 | open | Validate modifier applicability by declaration kind | PHPRS-057 | Define admitted modifier classes for methods, constants, properties, promoted parameters and hooks from documentation/behavior; reject misplaced readonly/set/static forms, with separate native-8.5 evidence where unavailable. |
 | PHPRS-102 | open | Validate asymmetric read/write visibility ordering | PHPRS-057; PHP manual visibility contract | Reject setter visibility more permissive than read visibility, preserve valid defaults and stricter setters, and retain property/promotion boundary fixtures. |
@@ -37,7 +36,7 @@
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
 | PHPRS-030 | deferred | Verify the hello world delivery | After syntax delivery and PHPRS-025 | Permanent automated tests run the file from README.md and assert exact stdout, empty stderr, and exit zero; rejection, file, and output-error tests pass offline. Mark hello world implemented only after these checks pass. |
-| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (166 Rust function/closure groups and 20 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
+| PHPRS-031 | in_progress | Finish function-quality and resource-boundary verification | PHPRS-035 | Retain fresh per-function coverage at least 80 percent (170 Rust function/closure groups and 20 Python tooling functions currently pass), bounded invalid-input tests and ownership/cleanup checks documented in README.md; obtain the missing complexity evidence before sign-off. |
 | PHPRS-035 | blocked | Measure SonarQube complexity per function | SonarQube Rust/Python analysis tooling is not installed locally | Produce SonarQube complexity values at most 9 for every new/changed production, test and tooling function, including heredoc_close_preserves_active_identity_phprs_034; record analyzer/tool versions and refactor any violations. Requires locally available supported analysis tooling or explicit owner authorization for necessary transfers; estimates and Clippy are not substitutes. |
 
 ## Control flow and callable code

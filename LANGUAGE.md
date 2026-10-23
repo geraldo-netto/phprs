@@ -101,6 +101,8 @@ members, constants, properties, methods, trait adaptations and attributes.
 Property-hook forms include ordinary and arrow bodies, declarations without a
 body, reference access, parameters, attributes and promoted properties. Recognize
 asymmetric set visibility and __PROPERTY__ without copying engine productions.
+Admit each get/set hook at most once, including reference-return variants, and
+reject other hook names.
 Specify modifier rejection as a separate language policy, with independently
 chosen tests and clear syntax-versus-compilation boundaries.
 
