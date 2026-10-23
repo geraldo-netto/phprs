@@ -16,6 +16,15 @@ struct ModifierStep {
 }
 
 impl NodeView<'_> {
+    fn conditional(&self, children: Range<usize>) -> Option<(usize, bool)> {
+        let indices = self.edges.get(children)?;
+        if !matches!(indices.len(), 4 | 5) {
+            return None;
+        }
+        let operator = self.nodes.get(indices[1])?;
+        (operator.kind == SyntaxKind::Token("'?'")).then_some((indices[0], indices.len() == 5))
+    }
+
     fn token(&self, mut index: usize) -> Option<&'static str> {
         loop {
             if let SyntaxKind::Token(name) = self.nodes.get(index)?.kind {
@@ -113,6 +122,9 @@ pub(super) fn validate_rule(
     view: NodeView<'_>,
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
+    if rule == "expression" {
+        return validate_conditional(&view, children);
+    }
     if matches!(
         rule,
         "member_modifiers" | "class_modifiers" | "promotion_modifiers"
@@ -131,6 +143,21 @@ pub(super) fn validate_rule(
         return Ok(());
     }
     Err(view.diagnostic(children, "syntax requires a variable-like operand"))
+}
+
+fn validate_conditional(view: &NodeView<'_>, children: Range<usize>) -> Result<(), Diagnostic> {
+    let Some((left, full)) = view.conditional(children.clone()) else {
+        return Ok(());
+    };
+    let nested = view.nodes.get(left).and_then(|node| {
+        (node.kind == SyntaxKind::Rule("expression"))
+            .then(|| view.conditional(node.children.clone()))
+            .flatten()
+    });
+    if nested.is_some_and(|(_, inner_full)| full || inner_full) {
+        return Err(view.diagnostic(children, "ambiguous ternary chain requires parentheses"));
+    }
+    Ok(())
 }
 
 fn incompatible(first: &str, second: &str) -> bool {

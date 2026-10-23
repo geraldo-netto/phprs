@@ -752,3 +752,33 @@ fn distinct_modifiers_remain_admitted_phprs_057() {
         common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
     }
 }
+
+#[test]
+fn ternary_chains_phprs_103() {
+    for (expression, accepted) in [
+        ("$a?:$b?:$c", true),
+        ("$a?$b?:$c:$d", true),
+        ("$a?$b?$c:$d:$e", true),
+        ("($a?$b:$c)?$d:$e", true),
+        ("$a?$b:($c?$d:$e)", true),
+        ("$a?:($b?$c:$d)", true),
+        ("($a?$b:$c)?:$d", true),
+        ("$a?$b:$c?$d:$e", false),
+        ("$a?:$b?$c:$d", false),
+        ("$a?$b:$c?:$d", false),
+        ("$a?:", false),
+        ("$a?$b:", false),
+    ] {
+        let source = format!("<?php {expression};");
+        assert_eq!(
+            php_accepts_with_args(source.as_bytes(), &["-n", "-l"]),
+            accepted,
+            "{source}"
+        );
+        let result = PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS);
+        assert_eq!(result.is_ok(), accepted, "{source}");
+        if let Ok(tree) = result {
+            common::verify_tree(&tree);
+        }
+    }
+}

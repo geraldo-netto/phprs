@@ -58,7 +58,11 @@ valid outermost __halt_compiler statement; retained payload still counts as inpu
 
 Specify precedence independently from the documented operator table, including
 right-associative exponentiation, coalescing and assignment; non-associative
-comparison/ternary groups; and PHP 8 concatenation, shifts and pipe precedence.
+comparison groups; PHP 8 concatenation, shifts and pipe precedence; and
+left-grouped shorthand ternary chains. Reject unparenthesized adjacent ternaries
+when either has a middle operand, as required by the documented PHP 8 language
+restriction, even though the local raw-token parser delays that check until
+compilation. Nested middle operands and explicit parentheses remain admitted.
 Group calls, construction and member/index access explicitly. Distinguish
 syntactic destination forms, destructuring patterns and value expressions.
 Variable-like syntax can include calls or nullsafe access; compiler-only
