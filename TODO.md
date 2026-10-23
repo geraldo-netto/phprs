@@ -5,13 +5,23 @@
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
 | PHPRS-003 | deferred | Select the PHP 8.x production acceptance profile | Revisit after PHPRS-030 | PHP 8.x.x is the language target; select release acceptance versions within that family, integer/platform assumptions, representative applications, extensions and measurable release criteria before production claims. No compatibility-only shims. |
-| PHPRS-038 | open | Audit PHP 8.x version coverage | Target is PHP 8.x.x; local grammar and oracle cover PHP 8.3.6 | Inventory syntax differences across the target minor releases using local authoritative sources first, implement required grammar/scanner differences with permanent tests, and record acceptance evidence per release. Keep unverified releases explicit; any required source/oracle transfer needs owner authorization. |
 
 ## Syntax and parsing
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-010 | in_progress | Finish the PHP 8.3 syntax delivery gate | PHPRS-031 | Retain the implemented source-spanned parser, pinned grammar, passing language-family/differential/invalid-input corpus and CLI; close the remaining function-quality evidence before declaring the syntax stage verified. Execution remains deferred. |
+| PHPRS-045 | open | Scan asymmetric property visibility | PHPRS-044 | Tokenize public(set), protected(set) and private(set) with exact case-insensitive spelling; preserve qualified names and property names; test promoted parameters, properties and malformed boundaries. |
+| PHPRS-046 | open | Parse void casts in admitted statement positions | PHPRS-044 | Scan (void) with PHP's tab/space rules; test statement and for-initializer/increment forms, rejecting expression/condition uses and malformed casts. |
+| PHPRS-047 | open | Verify pipe expressions and precedence | PHPRS-044 | Permanent positive/negative fixtures cover chained pipes, callable operands, precedence and malformed boundaries with source-spanned trees. |
+| PHPRS-054 | open | Verify clone and exit callable forms | PHPRS-044 | Cover named/unpacked/trailing/first-class argument forms and clone's parenthesis ambiguity; reject malformed argument lists without executing input. |
+| PHPRS-055 | open | Verify direct new-expression dereferencing | PHPRS-044 | Cover calls, property/nullsafe access, offsets and dynamic/anonymous construction; reject bare-new forms excluded by the grammar. |
+| PHPRS-056 | open | Verify attributed global constants | PHPRS-044 | Cover attribute groups, lists and namespace scopes on global constants; reject invalid attribute placement and incomplete declarations. |
+| PHPRS-048 | open | Preserve property mode across comments | PHPRS-044; PHP 8.5 scanner property rules | Keep object/nullsafe property names contextual across comments and whitespace; test reserved words, malformed comments, interpolation and code transitions. |
+| PHPRS-049 | open | Verify property-hook syntax and __PROPERTY__ | PHPRS-044, PHPRS-045 | Cover block/arrow/abstract and attributed hooks, references, parameter lists and promoted hooks; distinguish grammar acceptance from compile-time restrictions and retain malformed/truncation tests. |
+| PHPRS-052 | open | Audit remaining PHP 8.5 scanner changes | PHPRS-045, PHPRS-046, PHPRS-048 | Account for every source scanner delta, including token spellings, magic names, casts and unchanged string/number behavior; resolve acceptance gaps with permanent regressions. |
+| PHPRS-057 | open | Audit rejection checks removed with C grammar actions | PHPRS-044 | Inventory every YYERROR/YYABORT and syntax-affecting action; implement required independent rejection policies with permanent invalid-input tests, distinguishing compile/runtime semantics. |
+| PHPRS-053 | blocked | Compare syntax with a native PHP 8.5 oracle | PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057; local PHP is 8.3.6 only | Run the corpus against PHP 8.5 without executing inputs and investigate disagreements. Missing prerequisite: an available PHP 8.5 executable; source-only download authorization does not authorize binary/package transfers. |
+| PHPRS-010 | in_progress | Finish the PHP 8.5 syntax delivery gate | PHPRS-031, PHPRS-047, PHPRS-049, PHPRS-052, PHPRS-053, PHPRS-054, PHPRS-055, PHPRS-056, PHPRS-057 | Retain the single source-spanned PHP 8.5 parser, reproducible grammar, syntax corpus and CLI; close language acceptance and quality evidence before full syntax claims. Execution remains deferred. |
 
 ## Execution and values
 

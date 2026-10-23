@@ -3,7 +3,7 @@
 A PHP implementation in Rust, with a long-term goal of becoming a production
 replacement for PHP, targeting PHP 8.x.x. The current stage is PHP syntax support.
 The working tree implements a byte-oriented lexer, a parser derived from the
-PHP 8.3.6 grammar,
+PHP 8.5.0 grammar,
 and a syntax-checking CLI. Execution remains deferred.
 
 ## Check a file
@@ -31,8 +31,11 @@ Its tables preserve the upstream grammar's productions and precedence. This is
 syntax acceptance, not PHP semantic validation, name resolution, compilation,
 or runtime compatibility. Tests cover representative language families and a
 bounded invalid-input corpus; they do not establish equivalence for all inputs.
-PHP 8.x.x is the target family; only the PHP 8.3.6 grammar baseline has current
-comparison evidence. Other minor releases remain unverified (PHPRS-038).
+PHP 8.x.x is the target family, with PHP 8.5.0 as the single syntax baseline.
+The table integration is implemented; scanner extensions remain in progress
+for asymmetric visibility, void casts and property comments. The local PHP
+8.3.6 oracle validates shared syntax only. New PHP 8.5 fixtures are specified
+against the pinned grammar; native 8.5 comparison remains outstanding.
 Production acceptance versions and application coverage remain undecided.
 There are no compatibility-only shims for previous phprs APIs or PHP versions
 outside the target. Syntax supported by PHP 8 remains part of the language.
@@ -98,10 +101,10 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 40 Rust tests and 17 Python tests, including
+Verification on 2026-10-23 passes 41 Rust tests and 17 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
-PHP acceptance comparisons and deterministic generation of 1,121 states and
-586 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
+Shared-syntax PHP acceptance comparisons and deterministic generation of
+1,193 states and 624 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
 each measured production Rust function/closure. SonarQube complexity measurement
 is unavailable locally; its required evidence remains outstanding in
 [TODO.md](TODO.md). No full syntax-stage quality sign-off or production support

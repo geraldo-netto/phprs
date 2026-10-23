@@ -1,4 +1,4 @@
-// Generated from the PHP 8.3.6 grammar. See grammar/README.md.
+// Generated from the PHP 8.5.0 grammar. See grammar/README.md.
 pub const T_LNUMBER: u16 = 21;
 pub const T_DNUMBER: u16 = 22;
 pub const T_STRING: u16 = 23;
@@ -66,114 +66,120 @@ pub const T_FINAL: u16 = 84;
 pub const T_PRIVATE: u16 = 85;
 pub const T_PROTECTED: u16 = 86;
 pub const T_PUBLIC: u16 = 87;
-pub const T_READONLY: u16 = 88;
-pub const T_VAR: u16 = 89;
-pub const T_UNSET: u16 = 90;
-pub const T_ISSET: u16 = 91;
-pub const T_EMPTY: u16 = 92;
-pub const T_HALT_COMPILER: u16 = 93;
-pub const T_CLASS: u16 = 94;
-pub const T_TRAIT: u16 = 95;
-pub const T_INTERFACE: u16 = 96;
-pub const T_ENUM: u16 = 97;
-pub const T_EXTENDS: u16 = 98;
-pub const T_IMPLEMENTS: u16 = 99;
-pub const T_NAMESPACE: u16 = 100;
-pub const T_LIST: u16 = 101;
-pub const T_ARRAY: u16 = 102;
-pub const T_CALLABLE: u16 = 103;
-pub const T_LINE: u16 = 104;
-pub const T_FILE: u16 = 105;
-pub const T_DIR: u16 = 106;
-pub const T_CLASS_C: u16 = 107;
-pub const T_TRAIT_C: u16 = 108;
-pub const T_METHOD_C: u16 = 109;
-pub const T_FUNC_C: u16 = 110;
-pub const T_NS_C: u16 = 111;
+pub const T_PRIVATE_SET: u16 = 88;
+pub const T_PROTECTED_SET: u16 = 89;
+pub const T_PUBLIC_SET: u16 = 90;
+pub const T_READONLY: u16 = 91;
+pub const T_VAR: u16 = 92;
+pub const T_UNSET: u16 = 93;
+pub const T_ISSET: u16 = 94;
+pub const T_EMPTY: u16 = 95;
+pub const T_HALT_COMPILER: u16 = 96;
+pub const T_CLASS: u16 = 97;
+pub const T_TRAIT: u16 = 98;
+pub const T_INTERFACE: u16 = 99;
+pub const T_ENUM: u16 = 100;
+pub const T_EXTENDS: u16 = 101;
+pub const T_IMPLEMENTS: u16 = 102;
+pub const T_NAMESPACE: u16 = 103;
+pub const T_LIST: u16 = 104;
+pub const T_ARRAY: u16 = 105;
+pub const T_CALLABLE: u16 = 106;
+pub const T_LINE: u16 = 107;
+pub const T_FILE: u16 = 108;
+pub const T_DIR: u16 = 109;
+pub const T_CLASS_C: u16 = 110;
+pub const T_TRAIT_C: u16 = 111;
+pub const T_METHOD_C: u16 = 112;
+pub const T_FUNC_C: u16 = 113;
+pub const T_PROPERTY_C: u16 = 114;
+pub const T_NS_C: u16 = 115;
 pub const END: u16 = 0;
-pub const T_ATTRIBUTE: u16 = 112;
-pub const T_PLUS_EQUAL: u16 = 113;
-pub const T_MINUS_EQUAL: u16 = 114;
-pub const T_MUL_EQUAL: u16 = 115;
-pub const T_DIV_EQUAL: u16 = 116;
-pub const T_CONCAT_EQUAL: u16 = 117;
-pub const T_MOD_EQUAL: u16 = 118;
-pub const T_AND_EQUAL: u16 = 119;
-pub const T_OR_EQUAL: u16 = 120;
-pub const T_XOR_EQUAL: u16 = 121;
-pub const T_SL_EQUAL: u16 = 122;
-pub const T_SR_EQUAL: u16 = 123;
-pub const T_COALESCE_EQUAL: u16 = 124;
-pub const T_BOOLEAN_OR: u16 = 125;
-pub const T_BOOLEAN_AND: u16 = 126;
-pub const T_IS_EQUAL: u16 = 127;
-pub const T_IS_NOT_EQUAL: u16 = 128;
-pub const T_IS_IDENTICAL: u16 = 129;
-pub const T_IS_NOT_IDENTICAL: u16 = 130;
-pub const T_IS_SMALLER_OR_EQUAL: u16 = 131;
-pub const T_IS_GREATER_OR_EQUAL: u16 = 132;
-pub const T_SPACESHIP: u16 = 133;
-pub const T_SL: u16 = 134;
-pub const T_SR: u16 = 135;
-pub const T_INC: u16 = 136;
-pub const T_DEC: u16 = 137;
-pub const T_INT_CAST: u16 = 138;
-pub const T_DOUBLE_CAST: u16 = 139;
-pub const T_STRING_CAST: u16 = 140;
-pub const T_ARRAY_CAST: u16 = 141;
-pub const T_OBJECT_CAST: u16 = 142;
-pub const T_BOOL_CAST: u16 = 143;
-pub const T_UNSET_CAST: u16 = 144;
-pub const T_OBJECT_OPERATOR: u16 = 145;
-pub const T_NULLSAFE_OBJECT_OPERATOR: u16 = 146;
-pub const T_DOUBLE_ARROW: u16 = 147;
-pub const T_COMMENT: u16 = 148;
-pub const T_DOC_COMMENT: u16 = 149;
-pub const T_OPEN_TAG: u16 = 150;
-pub const T_OPEN_TAG_WITH_ECHO: u16 = 151;
-pub const T_CLOSE_TAG: u16 = 152;
-pub const T_WHITESPACE: u16 = 153;
-pub const T_START_HEREDOC: u16 = 154;
-pub const T_END_HEREDOC: u16 = 155;
-pub const T_DOLLAR_OPEN_CURLY_BRACES: u16 = 156;
-pub const T_CURLY_OPEN: u16 = 157;
-pub const T_PAAMAYIM_NEKUDOTAYIM: u16 = 158;
-pub const T_NS_SEPARATOR: u16 = 159;
-pub const T_ELLIPSIS: u16 = 160;
-pub const T_COALESCE: u16 = 161;
-pub const T_POW: u16 = 162;
-pub const T_POW_EQUAL: u16 = 163;
-pub const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: u16 = 164;
-pub const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG: u16 = 165;
-pub const T_BAD_CHARACTER: u16 = 166;
-pub const T_ERROR: u16 = 167;
+pub const T_ATTRIBUTE: u16 = 116;
+pub const T_PLUS_EQUAL: u16 = 117;
+pub const T_MINUS_EQUAL: u16 = 118;
+pub const T_MUL_EQUAL: u16 = 119;
+pub const T_DIV_EQUAL: u16 = 120;
+pub const T_CONCAT_EQUAL: u16 = 121;
+pub const T_MOD_EQUAL: u16 = 122;
+pub const T_AND_EQUAL: u16 = 123;
+pub const T_OR_EQUAL: u16 = 124;
+pub const T_XOR_EQUAL: u16 = 125;
+pub const T_SL_EQUAL: u16 = 126;
+pub const T_SR_EQUAL: u16 = 127;
+pub const T_COALESCE_EQUAL: u16 = 128;
+pub const T_BOOLEAN_OR: u16 = 129;
+pub const T_BOOLEAN_AND: u16 = 130;
+pub const T_IS_EQUAL: u16 = 131;
+pub const T_IS_NOT_EQUAL: u16 = 132;
+pub const T_IS_IDENTICAL: u16 = 133;
+pub const T_IS_NOT_IDENTICAL: u16 = 134;
+pub const T_IS_SMALLER_OR_EQUAL: u16 = 135;
+pub const T_IS_GREATER_OR_EQUAL: u16 = 136;
+pub const T_SPACESHIP: u16 = 137;
+pub const T_SL: u16 = 138;
+pub const T_SR: u16 = 139;
+pub const T_INC: u16 = 140;
+pub const T_DEC: u16 = 141;
+pub const T_INT_CAST: u16 = 142;
+pub const T_DOUBLE_CAST: u16 = 143;
+pub const T_STRING_CAST: u16 = 144;
+pub const T_ARRAY_CAST: u16 = 145;
+pub const T_OBJECT_CAST: u16 = 146;
+pub const T_BOOL_CAST: u16 = 147;
+pub const T_UNSET_CAST: u16 = 148;
+pub const T_VOID_CAST: u16 = 149;
+pub const T_OBJECT_OPERATOR: u16 = 150;
+pub const T_NULLSAFE_OBJECT_OPERATOR: u16 = 151;
+pub const T_DOUBLE_ARROW: u16 = 152;
+pub const T_COMMENT: u16 = 153;
+pub const T_DOC_COMMENT: u16 = 154;
+pub const T_OPEN_TAG: u16 = 155;
+pub const T_OPEN_TAG_WITH_ECHO: u16 = 156;
+pub const T_CLOSE_TAG: u16 = 157;
+pub const T_WHITESPACE: u16 = 158;
+pub const T_START_HEREDOC: u16 = 159;
+pub const T_END_HEREDOC: u16 = 160;
+pub const T_DOLLAR_OPEN_CURLY_BRACES: u16 = 161;
+pub const T_CURLY_OPEN: u16 = 162;
+pub const T_PAAMAYIM_NEKUDOTAYIM: u16 = 163;
+pub const T_NS_SEPARATOR: u16 = 164;
+pub const T_ELLIPSIS: u16 = 165;
+pub const T_COALESCE: u16 = 166;
+pub const T_POW: u16 = 167;
+pub const T_POW_EQUAL: u16 = 168;
+pub const T_PIPE: u16 = 169;
+pub const T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: u16 = 170;
+pub const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG: u16 = 171;
+pub const T_BAD_CHARACTER: u16 = 172;
+pub const T_ERROR: u16 = 173;
 pub(crate) static PUNCTUATION: &[(u8, u16)] = &[
     (33, 17),
-    (34, 177),
-    (36, 178),
+    (34, 183),
+    (36, 184),
     (37, 16),
-    (40, 170),
-    (41, 171),
+    (40, 177),
+    (41, 178),
     (42, 14),
     (43, 12),
-    (44, 168),
+    (44, 174),
     (45, 13),
     (46, 11),
     (47, 15),
     (58, 6),
-    (59, 172),
+    (59, 176),
     (60, 9),
     (61, 4),
     (62, 10),
     (63, 5),
     (64, 19),
-    (91, 175),
-    (93, 169),
+    (91, 181),
+    (93, 175),
     (94, 8),
-    (96, 176),
-    (123, 173),
+    (96, 182),
+    (123, 179),
     (124, 7),
-    (125, 174),
+    (125, 180),
     (126, 18),
 ];
 pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
@@ -244,6 +250,9 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_PRIVATE, "T_PRIVATE"),
     (T_PROTECTED, "T_PROTECTED"),
     (T_PUBLIC, "T_PUBLIC"),
+    (T_PRIVATE_SET, "T_PRIVATE_SET"),
+    (T_PROTECTED_SET, "T_PROTECTED_SET"),
+    (T_PUBLIC_SET, "T_PUBLIC_SET"),
     (T_READONLY, "T_READONLY"),
     (T_VAR, "T_VAR"),
     (T_UNSET, "T_UNSET"),
@@ -267,6 +276,7 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_TRAIT_C, "T_TRAIT_C"),
     (T_METHOD_C, "T_METHOD_C"),
     (T_FUNC_C, "T_FUNC_C"),
+    (T_PROPERTY_C, "T_PROPERTY_C"),
     (T_NS_C, "T_NS_C"),
     (END, "END"),
     (T_ATTRIBUTE, "T_ATTRIBUTE"),
@@ -302,6 +312,7 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_OBJECT_CAST, "T_OBJECT_CAST"),
     (T_BOOL_CAST, "T_BOOL_CAST"),
     (T_UNSET_CAST, "T_UNSET_CAST"),
+    (T_VOID_CAST, "T_VOID_CAST"),
     (T_OBJECT_OPERATOR, "T_OBJECT_OPERATOR"),
     (T_NULLSAFE_OBJECT_OPERATOR, "T_NULLSAFE_OBJECT_OPERATOR"),
     (T_DOUBLE_ARROW, "T_DOUBLE_ARROW"),
@@ -321,6 +332,7 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_COALESCE, "T_COALESCE"),
     (T_POW, "T_POW"),
     (T_POW_EQUAL, "T_POW_EQUAL"),
+    (T_PIPE, "T_PIPE"),
     (
         T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG,
         "T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG",
@@ -333,24 +345,25 @@ pub(crate) static TOKEN_NAMES: &[(u16, &str)] = &[
     (T_ERROR, "T_ERROR"),
 ];
 pub(crate) static KEYWORDS: &[(&str, u16)] = &[
-    ("__class__", 107),
-    ("__dir__", 106),
-    ("__file__", 105),
-    ("__function__", 110),
-    ("__halt_compiler", 93),
-    ("__line__", 104),
-    ("__method__", 109),
-    ("__namespace__", 111),
-    ("__trait__", 108),
+    ("__class__", 110),
+    ("__dir__", 109),
+    ("__file__", 108),
+    ("__function__", 113),
+    ("__halt_compiler", 96),
+    ("__line__", 107),
+    ("__method__", 112),
+    ("__namespace__", 115),
+    ("__property__", 114),
+    ("__trait__", 111),
     ("abstract", 83),
     ("and", 40),
-    ("array", 102),
+    ("array", 105),
     ("as", 62),
     ("break", 68),
-    ("callable", 103),
+    ("callable", 106),
     ("case", 65),
     ("catch", 76),
-    ("class", 94),
+    ("class", 97),
     ("clone", 46),
     ("const", 73),
     ("continue", 69),
@@ -360,17 +373,17 @@ pub(crate) static KEYWORDS: &[(&str, u16)] = &[
     ("echo", 52),
     ("else", 50),
     ("elseif", 49),
-    ("empty", 92),
+    ("empty", 95),
     ("enddeclare", 61),
     ("endfor", 57),
     ("endforeach", 59),
     ("endif", 51),
     ("endswitch", 64),
     ("endwhile", 55),
-    ("enum", 97),
+    ("enum", 100),
     ("eval", 35),
     ("exit", 47),
-    ("extends", 98),
+    ("extends", 101),
     ("final", 84),
     ("finally", 77),
     ("fn", 72),
@@ -380,74 +393,78 @@ pub(crate) static KEYWORDS: &[(&str, u16)] = &[
     ("global", 81),
     ("goto", 70),
     ("if", 48),
-    ("implements", 99),
+    ("implements", 102),
     ("include", 33),
     ("include_once", 34),
     ("instanceof", 44),
     ("insteadof", 80),
-    ("interface", 96),
-    ("isset", 91),
-    ("list", 101),
+    ("interface", 99),
+    ("isset", 94),
+    ("list", 104),
     ("match", 67),
-    ("namespace", 100),
+    ("namespace", 103),
     ("new", 45),
     ("or", 38),
     ("print", 41),
     ("private", 85),
     ("protected", 86),
     ("public", 87),
-    ("readonly", 88),
+    ("readonly", 91),
     ("require", 36),
     ("require_once", 37),
     ("return", 74),
     ("static", 82),
     ("switch", 63),
     ("throw", 78),
-    ("trait", 95),
+    ("trait", 98),
     ("try", 75),
-    ("unset", 90),
+    ("unset", 93),
     ("use", 79),
-    ("var", 89),
+    ("var", 92),
     ("while", 54),
     ("xor", 39),
     ("yield", 42),
 ];
 pub(crate) static OPERATORS: &[(&[u8], u16)] = &[
+    (b"protected(set)", 89),
+    (b"private(set)", 88),
+    (b"public(set)", 90),
     (b"yield from", 43),
-    (b"!==", 130),
-    (b"**=", 163),
-    (b"...", 160),
-    (b"<<=", 122),
-    (b"<=>", 133),
-    (b"===", 129),
-    (b">>=", 123),
-    (b"?->", 146),
-    (b"??=", 124),
-    (b"!=", 128),
-    (b"#[", 112),
-    (b"%=", 118),
-    (b"&&", 126),
-    (b"&=", 119),
-    (b"**", 162),
-    (b"*=", 115),
-    (b"++", 136),
-    (b"+=", 113),
-    (b"--", 137),
-    (b"-=", 114),
-    (b"->", 145),
-    (b".=", 117),
-    (b"/=", 116),
-    (b"::", 158),
-    (b"<<", 134),
-    (b"<=", 131),
-    (b"==", 127),
-    (b"=>", 147),
-    (b">=", 132),
-    (b">>", 135),
-    (b"??", 161),
-    (b"^=", 121),
-    (b"|=", 120),
-    (b"||", 125),
-    (b"&", 164),
-    (b"\\", 159),
+    (b"!==", 134),
+    (b"**=", 168),
+    (b"...", 165),
+    (b"<<=", 126),
+    (b"<=>", 137),
+    (b"===", 133),
+    (b">>=", 127),
+    (b"?->", 151),
+    (b"??=", 128),
+    (b"!=", 132),
+    (b"#[", 116),
+    (b"%=", 122),
+    (b"&&", 130),
+    (b"&=", 123),
+    (b"**", 167),
+    (b"*=", 119),
+    (b"++", 140),
+    (b"+=", 117),
+    (b"--", 141),
+    (b"-=", 118),
+    (b"->", 150),
+    (b".=", 121),
+    (b"/=", 120),
+    (b"::", 163),
+    (b"<<", 138),
+    (b"<=", 135),
+    (b"==", 131),
+    (b"=>", 152),
+    (b">=", 136),
+    (b">>", 139),
+    (b"??", 166),
+    (b"^=", 125),
+    (b"|=", 124),
+    (b"|>", 169),
+    (b"||", 129),
+    (b"&", 170),
+    (b"\\", 164),
 ];

@@ -1,45 +1,41 @@
 # PHP grammar inputs
 
-`php-8.3.6/` contains the pinned PHP 8.3.6 parser and scanner sources and their
-license notices. Their upstream identities are the `php-8.3.6` tag of `php/php-src`,
-paths `Zend/zend_language_parser.y`, `Zend/zend_language_scanner.l`, `LICENSE`
-and `Zend/LICENSE` (stored here as `ZEND_LICENSE`). This records the identity of
-the local inputs; no remote comparison was performed during this verification.
+`php-8.5.0/` is the single grammar baseline. The four files were downloaded with
+owner authorization on 2026-10-23, totaling 153,009 bytes. Only these source and
+notice files were transferred; no PHP archive, binary or package was acquired.
+The parser/scanner retain their Zend Engine License 2.00 headers, and the PHP
+License 3.01 and Zend license texts are retained here. Consult those notices for
+their terms. They do not select a project license for phprs (PHPRS-081).
 
-Both Zend source files retain their copyright and Zend Engine License 2.00
-headers. The PHP License 3.01 and Zend license texts are retained alongside them.
-Derived grammar/tables retain these origins; the generator removes PHP semantic
-C actions and comments while preserving syntax productions, tokens and
-precedence. Generated line margins use spaces and omit trailing whitespace;
-quoted literals and pinned source bytes remain unchanged. Consult the retained
-licenses for their terms. These notices do not
-select a license for phprs; that owner decision remains PHPRS-081.
-
-SHA-256 of the local inputs:
-
-| file in php-8.3.6/ | SHA-256 |
-|---|---|
-| zend_language_parser.y | `176e20bd96fea48f508b0e1f35d1c6272211823d2fcbb77a4bd289927f756d0e` |
-| zend_language_scanner.l | `4191bc19d4f41f20b1da81744323394dae61a19b8808d70bcbe73724d0126ff6` |
-| LICENSE | `b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a` |
-| ZEND_LICENSE | `509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b` |
+| local file in php-8.5.0/ | upstream source | SHA-256 |
+|---|---|---|
+| zend_language_parser.y | [Zend grammar](https://raw.githubusercontent.com/php/php-src/php-8.5.0/Zend/zend_language_parser.y) | `2cc2c362823a2fcaff661a69b597884548ae88bdc9f1845132d8f1b8236a972b` |
+| zend_language_scanner.l | [Zend scanner](https://raw.githubusercontent.com/php/php-src/php-8.5.0/Zend/zend_language_scanner.l) | `5e178b9e0a4f865a423a098ac97ba5fc04ef2f68503382e18599d89d9ad8d15b` |
+| LICENSE | [PHP license](https://raw.githubusercontent.com/php/php-src/php-8.5.0/LICENSE) | `b42e4df5e50e6ecda1047d503d6d91d71032d09ed1027ba1ef29eed26f890c5a` |
+| ZEND_LICENSE | [Zend license](https://raw.githubusercontent.com/php/php-src/php-8.5.0/Zend/LICENSE) | `509aeb3be64e428d7e0004ce224620ab01bf94adaacefbb449611939df56bc5b` |
 
 The scanner is a reference for the Rust lexer, not an input to table generation.
-`tools/generate_parser.py` extracts the parser grammar, uses GNU Bison's XML
-report and emits `grammar/syntax.y`, `src/syntax/token_ids.rs` and
-`src/syntax/tables.rs`. The generated symbol indices are internal and are not
-PHP's external token numbers. Sparse symbol numbering is preserved explicitly.
+`tools/generate_parser.py` extracts the grammar, removes C actions and comments,
+and uses GNU Bison's XML report to emit `grammar/syntax.y`,
+`src/syntax/token_ids.rs` and `src/syntax/tables.rs`. It preserves productions and
+precedence, normalizes generated line margins, and preserves quoted literals.
+Generated symbol indices are internal, with sparse numbering retained explicitly.
+Removing C actions does not reproduce their rejection checks automatically;
+PHPRS-052 tracks the audit of those checks.
 
-From the project root, using only installed tools:
+Check all generated files offline from the project root:
 
 ```sh
 python3 tools/generate_parser.py --check
 ```
 
-To intentionally regenerate instead of checking, omit `--check`. The generator
-owns its temporary directory and subprocesses synchronously; temporary artifacts
-are removed when the directory context exits, including on failure. No input
-program executes. Verification on 2026-10-23 reproduces all checked-in generated
-files, with 1,121 states, 586 rules and zero Bison grammar conflicts, using GNU
-Bison 3.8.2, Python 3.12.3 and rustfmt 1.9.0-stable from Rust 1.98.1. Other tool
-versions have not been validated for byte-identical output.
+Omit `--check` to intentionally regenerate. The generator owns its temporary
+directory and waits for its subprocesses; temporary artifacts are removed on
+success or failure. Input programs never execute. Verification on 2026-10-23
+reproduces 1,193 states and 624 rules with zero Bison grammar conflicts, using
+GNU Bison 3.8.2, Python 3.12.3 and rustfmt 1.9.0-stable from Rust 1.98.1. Other
+tool versions have not been validated for byte-identical output.
+
+The installed PHP executable is 8.3.6. It remains useful for shared-syntax
+comparisons, but cannot verify PHP 8.5-only syntax. Grammar fixtures and table
+bounds do not replace the missing native PHP 8.5 acceptance evidence (PHPRS-053).

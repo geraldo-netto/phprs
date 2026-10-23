@@ -5,7 +5,7 @@ mod token_ids;
 
 use crate::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxParser, SyntaxTree};
 
-/// Stateless PHP parser using the checked-in PHP 8.3.6 grammar tables.
+/// Stateless PHP parser using the checked-in PHP 8.5.0 grammar tables.
 pub struct PhpParser;
 
 impl SyntaxParser for PhpParser {

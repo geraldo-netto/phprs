@@ -226,8 +226,8 @@ mod table_tests {
 
     #[test]
     fn finite_table_bounds_phprs_013() {
-        assert_eq!(DEFAULTS.len(), 1121);
-        assert_eq!(RULES.len(), 586);
+        assert_eq!(DEFAULTS.len(), 1193);
+        assert_eq!(RULES.len(), 624);
         assert_eq!(ACTION_OFFSETS.len(), DEFAULTS.len() + 1);
         assert_eq!(GOTO_OFFSETS.len(), DEFAULTS.len() + 1);
         assert_eq!(ACTION_OFFSETS.last(), Some(&ACTIONS.len()));

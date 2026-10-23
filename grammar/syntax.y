@@ -18,6 +18,7 @@
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -97,6 +98,9 @@
 %token  T_PRIVATE       "'private'"
 %token  T_PROTECTED     "'protected'"
 %token  T_PUBLIC        "'public'"
+%token  T_PRIVATE_SET   "'private(set)'"
+%token  T_PROTECTED_SET "'protected(set)'"
+%token  T_PUBLIC_SET    "'public(set)'"
 %token  T_READONLY      "'readonly'"
 %token  T_VAR           "'var'"
 %token  T_UNSET         "'unset'"
@@ -120,6 +124,7 @@
 %token  T_TRAIT_C         "'__TRAIT__'"
 %token  T_METHOD_C        "'__METHOD__'"
 %token  T_FUNC_C          "'__FUNCTION__'"
+%token  T_PROPERTY_C      "'__PROPERTY__'"
 %token  T_NS_C            "'__NAMESPACE__'"
 %token END 0 "end of file"
 %token T_ATTRIBUTE    "'#['"
@@ -149,12 +154,13 @@
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(double)'"
+%token T_DOUBLE_CAST "'(float)'"
 %token T_STRING_CAST "'(string)'"
 %token T_ARRAY_CAST  "'(array)'"
 %token T_OBJECT_CAST "'(object)'"
 %token T_BOOL_CAST   "'(bool)'"
 %token T_UNSET_CAST  "'(unset)'"
+%token T_VOID_CAST   "'(void)'"
 %token T_OBJECT_OPERATOR "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
 %token T_DOUBLE_ARROW    "'=>'"
@@ -174,6 +180,7 @@
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "'|>'"
 %token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
 %token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
 %token T_BAD_CHARACTER   "invalid character"
@@ -194,6 +201,7 @@ reserved_non_modifiers:
     | T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
     | T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
     | T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
+    | T_PROPERTY_C
 ;
 
 semi_reserved:
@@ -272,10 +280,15 @@ attributed_statement:
     |	enum_declaration_statement
 ;
 
+attributed_top_statement:
+        attributed_statement
+    |	T_CONST const_list ';'
+;
+
 top_statement:
         statement
-    |	attributed_statement
-    |	attributes attributed_statement
+    |	attributed_top_statement
+    |	attributes attributed_top_statement
     |	T_HALT_COMPILER '(' ')' ';'
 
     |	T_NAMESPACE namespace_declaration_name ';'
@@ -290,7 +303,6 @@ top_statement:
     |	T_USE use_type group_use_declaration ';'
     |	T_USE use_declarations ';'
     |	T_USE use_type use_declarations ';'
-    |	T_CONST const_list ';'
 ;
 
 use_type:
@@ -383,7 +395,7 @@ statement:
 
     |	T_DO statement T_WHILE '(' expr ')' ';'
 
-    |	T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
+    |	T_FOR '(' for_exprs ';' for_cond_exprs ';' for_exprs ')' for_statement
 
     |	T_SWITCH '(' expr ')' switch_case_list
 
@@ -410,6 +422,7 @@ statement:
 
     |	T_GOTO T_STRING ';'
     |	T_STRING ':'
+    |	T_VOID_CAST expr ';'
 ;
 
 catch_list:
@@ -576,21 +589,20 @@ switch_case_list:
 
 case_list:
         %empty
-    |	case_list T_CASE expr case_separator inner_statement_list
+    |	case_list T_CASE expr ':' inner_statement_list
 
-    |	case_list T_DEFAULT case_separator inner_statement_list
+    |	case_list T_CASE expr ';' inner_statement_list
 
-;
+    |	case_list T_DEFAULT ':' inner_statement_list
 
-case_separator:
-        ':'
-    |	';'
+    |	case_list T_DEFAULT ';' inner_statement_list
+
 ;
 
 
 match:
         T_MATCH '(' expr ')' '{' match_arm_list '}'
-            ;
+
 ;
 
 match_arm_list:
@@ -675,10 +687,10 @@ optional_cpp_modifiers:
 
 parameter:
         optional_cpp_modifiers optional_type_without_static
-        is_reference is_variadic T_VARIABLE backup_doc_comment
+        is_reference is_variadic T_VARIABLE backup_doc_comment optional_property_hook_list
 
     |	optional_cpp_modifiers optional_type_without_static
-        is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
+        is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr optional_property_hook_list
 
 ;
 
@@ -768,11 +780,32 @@ non_empty_argument_list:
 
 ;
 
-argument:
-        expr
-    |	identifier ':' expr
+
+clone_argument_list:
+        '(' ')'
+    |	'(' non_empty_clone_argument_list possible_comma ')'
+    |	'(' expr ',' ')'
+    |	'(' T_ELLIPSIS ')'
+;
+
+non_empty_clone_argument_list:
+        expr ',' argument
+
+    |	argument_no_expr
+
+    |	non_empty_clone_argument_list ',' argument
+
+;
+
+argument_no_expr:
+        identifier ':' expr
 
     |	T_ELLIPSIS expr
+;
+
+argument:
+        expr
+    |	argument_no_expr
 ;
 
 global_var_list:
@@ -806,6 +839,8 @@ class_statement_list:
 
 attributed_class_statement:
         property_modifiers optional_type_without_static property_list ';'
+
+    |	property_modifiers optional_type_without_static hooked_property
 
     |	class_const_modifiers T_CONST class_const_list ';'
 
@@ -911,6 +946,9 @@ member_modifier:
         T_PUBLIC
     |	T_PROTECTED
     |	T_PRIVATE
+    |	T_PUBLIC_SET
+    |	T_PROTECTED_SET
+    |	T_PRIVATE_SET
     |	T_STATIC
     |	T_ABSTRACT
     |	T_FINAL
@@ -927,6 +965,47 @@ property:
 
     |	T_VARIABLE '=' expr backup_doc_comment
 
+;
+
+hooked_property:
+        T_VARIABLE backup_doc_comment '{' property_hook_list '}'
+
+    |	T_VARIABLE '=' expr backup_doc_comment '{' property_hook_list '}'
+
+;
+
+property_hook_list:
+        %empty
+    |	property_hook_list property_hook
+    |	property_hook_list attributes property_hook
+;
+
+optional_property_hook_list:
+        %empty
+    |	'{' property_hook_list '}'
+;
+
+property_hook_modifiers:
+        %empty
+    |	non_empty_member_modifiers
+;
+
+property_hook:
+        property_hook_modifiers returns_ref T_STRING
+        backup_doc_comment
+        optional_parameter_list backup_fn_flags property_hook_body backup_fn_flags
+;
+
+property_hook_body:
+        ';'
+    |	'{' inner_statement_list '}'
+    |	T_DOUBLE_ARROW expr ';'
+
+;
+
+optional_parameter_list:
+        %empty
+    |	'(' parameter_list ')'
 ;
 
 class_const_list:
@@ -951,6 +1030,12 @@ echo_expr:
     expr
 ;
 
+for_cond_exprs:
+        %empty
+    |	non_empty_for_exprs ',' expr
+    |	expr
+;
+
 for_exprs:
         %empty
     |	non_empty_for_exprs
@@ -958,6 +1043,8 @@ for_exprs:
 
 non_empty_for_exprs:
         non_empty_for_exprs ',' expr
+    |	non_empty_for_exprs ',' T_VOID_CAST expr
+    |	T_VOID_CAST expr
     |	expr
 ;
 
@@ -966,12 +1053,17 @@ anonymous_class:
         extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 ;
 
-new_expr:
-        T_NEW class_name_reference ctor_arguments
+new_dereferenceable:
+        T_NEW class_name_reference argument_list
 
     |	T_NEW anonymous_class
 
     |	T_NEW attributes anonymous_class
+
+;
+
+new_non_dereferenceable:
+        T_NEW class_name_reference
 
 ;
 
@@ -986,6 +1078,7 @@ expr:
 
     |	variable '=' ampersand variable
 
+    |	T_CLONE clone_argument_list
     |	T_CLONE expr
     |	variable T_PLUS_EQUAL expr
 
@@ -1052,6 +1145,8 @@ expr:
 
     |	expr T_IS_NOT_EQUAL expr
 
+    |	expr T_PIPE expr
+
     |	expr '<' expr
 
     |	expr T_IS_SMALLER_OR_EQUAL expr
@@ -1065,7 +1160,8 @@ expr:
     |	expr T_INSTANCEOF class_name_reference
 
     |	'(' expr ')'
-    |	new_expr
+    |	new_dereferenceable
+    |	new_non_dereferenceable
     |	expr '?' expr ':' expr
 
     |	expr '?' ':' expr
@@ -1080,7 +1176,7 @@ expr:
     |	T_OBJECT_CAST expr
     |	T_BOOL_CAST expr
     |	T_UNSET_CAST expr
-    |	T_EXIT exit_expr
+    |	T_EXIT ctor_arguments
     |	'@' expr
     |	scalar
     |	'`' backticks_expr '`'
@@ -1171,11 +1267,6 @@ class_name_reference:
     |	'(' expr ')'
 ;
 
-exit_expr:
-        %empty
-    |	'(' optional_expr ')'
-;
-
 backticks_expr:
         %empty
 
@@ -1217,6 +1308,7 @@ constant:
     |	T_TRAIT_C
     |	T_METHOD_C
     |	T_FUNC_C
+    |	T_PROPERTY_C
     |	T_NS_C
     |	T_CLASS_C
 ;
@@ -1246,6 +1338,7 @@ fully_dereferenceable:
     |	'(' expr ')'
     |	dereferenceable_scalar
     |	class_constant
+    |	new_dereferenceable
 ;
 
 array_object_dereferenceable:
@@ -1257,14 +1350,13 @@ callable_expr:
         callable_variable
     |	'(' expr ')'
     |	dereferenceable_scalar
+    |	new_dereferenceable
 ;
 
 callable_variable:
         simple_variable
 
     |	array_object_dereferenceable '[' optional_expr ']'
-
-    |	array_object_dereferenceable '{' expr '}'
 
     |	array_object_dereferenceable T_OBJECT_OPERATOR property_name argument_list
 
@@ -1301,8 +1393,6 @@ new_variable:
         simple_variable
 
     |	new_variable '[' optional_expr ']'
-
-    |	new_variable '{' expr '}'
 
     |	new_variable T_OBJECT_OPERATOR property_name
 
