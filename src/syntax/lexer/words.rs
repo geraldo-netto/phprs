@@ -40,9 +40,6 @@ impl Lexer<'_> {
         if word.contains(&b'\\') {
             return qualified_kind(word);
         }
-        if word.eq_ignore_ascii_case(b"die") {
-            return T_EXIT;
-        }
         KEYWORDS
             .iter()
             .find(|&&(name, _)| word.eq_ignore_ascii_case(name.as_bytes()))
@@ -192,21 +189,7 @@ fn ascii_prefix(word: &[u8], prefix: &[u8]) -> bool {
 }
 
 fn cast_kind(word: &[u8]) -> Option<u16> {
-    let casts: &[(&[u8], u16)] = &[
-        (b"int", T_INT_CAST),
-        (b"integer", T_INT_CAST),
-        (b"float", T_DOUBLE_CAST),
-        (b"double", T_DOUBLE_CAST),
-        (b"string", T_STRING_CAST),
-        (b"binary", T_STRING_CAST),
-        (b"array", T_ARRAY_CAST),
-        (b"object", T_OBJECT_CAST),
-        (b"bool", T_BOOL_CAST),
-        (b"boolean", T_BOOL_CAST),
-        (b"unset", T_UNSET_CAST),
-        (b"void", T_VOID_CAST),
-    ];
-    casts
+    CASTS
         .iter()
         .find(|&&(name, _)| word.eq_ignore_ascii_case(name))
         .map(|&(_, id)| id)

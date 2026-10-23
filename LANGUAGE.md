@@ -2,8 +2,8 @@
 
 Status: the PHP 8.x target and independent-implementation requirement are accepted
 owner requirements. PHP 8.5 is the selected language baseline. The independent
-grammar implementation is in progress; the existing PHP-derived grammar does not
-satisfy this contract's provenance requirement.
+grammar implementation is authored here from documentation and observable
+behavior. Native PHP 8.5 acceptance and final quality evidence remain pending.
 
 ## Sources and scope
 
@@ -59,9 +59,11 @@ valid outermost __halt_compiler statement; retained payload still counts as inpu
 Specify precedence independently from the documented operator table, including
 right-associative exponentiation, coalescing and assignment; non-associative
 comparison/ternary groups; and PHP 8 concatenation, shifts and pipe precedence.
-Group calls, construction and member/index access explicitly. Distinguish writable
-places, destructuring patterns and value expressions rather than accepting every
-expression as an assignment destination.
+Group calls, construction and member/index access explicitly. Distinguish
+syntactic destination forms, destructuring patterns and value expressions.
+Variable-like syntax can include calls or nullsafe access; compiler-only
+writability restrictions remain outside parsing. Literal/constant destinations
+and invalid prefix-mutation/reference operands must be rejected.
 
 Support arrays, references, unpacking, callable arguments, named arguments,
 first-class callables, closures, arrow functions, generators, match expressions,

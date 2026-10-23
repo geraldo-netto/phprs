@@ -23,7 +23,7 @@
   interfaces. Syntax still supported by the PHP 8 target is a language requirement,
   not a compatibility shim; do not remove it solely because it predates PHP 8.
 - Keep the PHP 8.x target distinct from verified version coverage: the current
-  single grammar baseline is PHP 8.5.0; the local comparison oracle is PHP 8.3.6
+  single independently authored grammar targets PHP 8.5; the local comparison oracle is PHP 8.3.6
   and validates only shared syntax. Do not maintain parallel minor-version
   implementations or claim native PHP 8.5 validation without its oracle.
 - Keep proposed, implemented, and verified behavior clearly distinguished.

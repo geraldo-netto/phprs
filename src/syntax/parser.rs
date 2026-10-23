@@ -1,6 +1,7 @@
 use super::{
     error,
     lexer::{Lexer, Token},
+    policy::{NodeView, validate_rule},
     reserve,
     tables::*,
     token_ids::*,
@@ -112,7 +113,15 @@ impl<'source> Parser<'source> {
         let start = self.stack.len() - length;
         let children = self.reduce_children(start)?;
         let span = self.reduce_span(children.clone());
-        self.reduction_effects(symbol, children.clone())?;
+        validate_rule(
+            SYMBOL_NAMES[usize::from(symbol)],
+            NodeView {
+                nodes: &self.tree.nodes,
+                edges: &self.tree.edges,
+            },
+            children.clone(),
+        )?;
+        self.reduction_effects(symbol);
         self.stack.truncate(start);
         let node = self.add_node(
             SyntaxKind::Rule(SYMBOL_NAMES[usize::from(symbol)]),
@@ -149,30 +158,11 @@ impl<'source> Parser<'source> {
         self.tree.nodes[first].span.start..self.tree.nodes[last].span.end
     }
 
-    fn reduction_effects(&mut self, symbol: u16, children: Range<usize>) -> Result<(), Diagnostic> {
-        let Some(&first) = self
-            .tree
-            .edges
-            .get(children.start)
-            .filter(|_| !children.is_empty())
-        else {
-            return Ok(());
-        };
-        if self.tree.nodes[first].kind != SyntaxKind::Token("T_HALT_COMPILER") {
-            return Ok(());
-        }
-        if SYMBOL_NAMES[usize::from(symbol)] == "inner_statement" {
-            return Err(error(
-                ErrorKind::Syntax,
-                self.tree.nodes[first].span.start,
-                "halt compiler requires outermost scope",
-            ));
-        }
-        if SYMBOL_NAMES[usize::from(symbol)] == "top_statement" {
+    fn reduction_effects(&mut self, symbol: u16) {
+        if SYMBOL_NAMES[usize::from(symbol)] == "file_halt" {
             self.lexer.halt();
             self.lookahead = None;
         }
-        Ok(())
     }
 
     fn add_node(
@@ -226,8 +216,8 @@ mod table_tests {
 
     #[test]
     fn finite_table_bounds_phprs_013() {
-        assert_eq!(DEFAULTS.len(), 1193);
-        assert_eq!(RULES.len(), 624);
+        assert_eq!(DEFAULTS.len(), 1114);
+        assert_eq!(RULES.len(), 634);
         assert_eq!(ACTION_OFFSETS.len(), DEFAULTS.len() + 1);
         assert_eq!(GOTO_OFFSETS.len(), DEFAULTS.len() + 1);
         assert_eq!(ACTION_OFFSETS.last(), Some(&ACTIONS.len()));

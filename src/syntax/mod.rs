@@ -1,11 +1,12 @@
 mod lexer;
 mod parser;
+mod policy;
 mod tables;
 mod token_ids;
 
 use crate::contracts::{Diagnostic, ErrorKind, ParseOptions, SyntaxParser, SyntaxTree};
 
-/// Stateless PHP parser using the checked-in PHP 8.5.0 grammar tables.
+/// Stateless implementation of the independent PHP 8.5 syntax contract.
 pub struct PhpParser;
 
 impl SyntaxParser for PhpParser {

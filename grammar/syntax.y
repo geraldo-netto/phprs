@@ -1,6 +1,157 @@
-%precedence T_THROW
-%precedence PREC_ARROW_FUNCTION
-%precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
+%start start
+%token T_ABSTRACT
+%token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
+%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
+%token T_AND_EQUAL
+%token T_ARRAY
+%token T_ARRAY_CAST
+%token T_AS
+%token T_ATTRIBUTE
+%token T_BAD_CHARACTER
+%token T_BOOLEAN_AND
+%token T_BOOLEAN_OR
+%token T_BOOL_CAST
+%token T_BREAK
+%token T_CALLABLE
+%token T_CASE
+%token T_CATCH
+%token T_CLASS
+%token T_CLASS_C
+%token T_CLONE
+%token T_CLOSE_TAG
+%token T_COALESCE
+%token T_COALESCE_EQUAL
+%token T_COMMENT
+%token T_CONCAT_EQUAL
+%token T_CONST
+%token T_CONSTANT_ENCAPSED_STRING
+%token T_CONTINUE
+%token T_CURLY_OPEN
+%token T_DEC
+%token T_DECLARE
+%token T_DEFAULT
+%token T_DIR
+%token T_DIV_EQUAL
+%token T_DNUMBER
+%token T_DO
+%token T_DOC_COMMENT
+%token T_DOLLAR_OPEN_CURLY_BRACES
+%token T_DOUBLE_ARROW
+%token T_DOUBLE_CAST
+%token T_DOUBLE_COLON
+%token T_ECHO
+%token T_ELLIPSIS
+%token T_ELSE
+%token T_ELSEIF
+%token T_EMPTY
+%token T_ENCAPSED_AND_WHITESPACE
+%token T_ENDDECLARE
+%token T_ENDFOR
+%token T_ENDFOREACH
+%token T_ENDIF
+%token T_ENDSWITCH
+%token T_ENDWHILE
+%token T_END_HEREDOC
+%token T_ENUM
+%token T_EVAL
+%token T_EXIT
+%token T_EXTENDS
+%token T_FILE
+%token T_FINAL
+%token T_FINALLY
+%token T_FN
+%token T_FOR
+%token T_FOREACH
+%token T_FUNCTION
+%token T_FUNC_C
+%token T_GLOBAL
+%token T_GOTO
+%token T_HALT_COMPILER
+%token T_IF
+%token T_IMPLEMENTS
+%token T_INC
+%token T_INCLUDE
+%token T_INCLUDE_ONCE
+%token T_INLINE_HTML
+%token T_INSTANCEOF
+%token T_INSTEADOF
+%token T_INTERFACE
+%token T_INT_CAST
+%token T_ISSET
+%token T_IS_EQUAL
+%token T_IS_GREATER_OR_EQUAL
+%token T_IS_IDENTICAL
+%token T_IS_NOT_EQUAL
+%token T_IS_NOT_IDENTICAL
+%token T_IS_SMALLER_OR_EQUAL
+%token T_LINE
+%token T_LIST
+%token T_LNUMBER
+%token T_LOGICAL_AND
+%token T_LOGICAL_OR
+%token T_LOGICAL_XOR
+%token T_MATCH
+%token T_METHOD_C
+%token T_MINUS_EQUAL
+%token T_MOD_EQUAL
+%token T_MUL_EQUAL
+%token T_NAMESPACE
+%token T_NAME_FULLY_QUALIFIED
+%token T_NAME_QUALIFIED
+%token T_NAME_RELATIVE
+%token T_NEW
+%token T_NS_C
+%token T_NS_SEPARATOR
+%token T_NULLSAFE_OBJECT_OPERATOR
+%token T_NUM_STRING
+%token T_OBJECT_CAST
+%token T_OBJECT_OPERATOR
+%token T_OPEN_TAG
+%token T_OPEN_TAG_WITH_ECHO
+%token T_OR_EQUAL
+%token T_PIPE
+%token T_PLUS_EQUAL
+%token T_POW
+%token T_POW_EQUAL
+%token T_PRINT
+%token T_PRIVATE
+%token T_PRIVATE_SET
+%token T_PROPERTY_C
+%token T_PROTECTED
+%token T_PROTECTED_SET
+%token T_PUBLIC
+%token T_PUBLIC_SET
+%token T_READONLY
+%token T_REQUIRE
+%token T_REQUIRE_ONCE
+%token T_RETURN
+%token T_SL
+%token T_SL_EQUAL
+%token T_SPACESHIP
+%token T_SR
+%token T_SR_EQUAL
+%token T_START_HEREDOC
+%token T_STATIC
+%token T_STRING
+%token T_STRING_CAST
+%token T_STRING_VARNAME
+%token T_SWITCH
+%token T_THROW
+%token T_TRAIT
+%token T_TRAIT_C
+%token T_TRY
+%token T_UNSET
+%token T_UNSET_CAST
+%token T_USE
+%token T_VAR
+%token T_VARIABLE
+%token T_VOID_CAST
+%token T_WHILE
+%token T_WHITESPACE
+%token T_XOR_EQUAL
+%token T_YIELD
+%token T_YIELD_FROM
+%precedence P_ARROW
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
@@ -8,1509 +159,715 @@
 %precedence T_YIELD
 %precedence T_DOUBLE_ARROW
 %precedence T_YIELD_FROM
-%precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
-%left '?' ':'
+%precedence T_THROW T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
+%right '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_MOD_EQUAL T_CONCAT_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
+%nonassoc '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
 %left '|'
 %left '^'
-%left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
+%left P_BIT_AND T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
-%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%nonassoc '<' '>' T_IS_SMALLER_OR_EQUAL T_IS_GREATER_OR_EQUAL
 %left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
 %left '*' '/' '%'
 %precedence '!'
-%precedence T_INSTANCEOF
-%precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%left T_INSTANCEOF
+%precedence P_UNARY
 %right T_POW
-%precedence T_CLONE
-%precedence T_NOELSE
-%precedence T_ELSEIF
-%precedence T_ELSE
-%token  T_LNUMBER   "integer"
-%token  T_DNUMBER   "floating-point number"
-%token  T_STRING    "identifier"
-%token  T_NAME_FULLY_QUALIFIED "fully qualified name"
-%token  T_NAME_RELATIVE "namespace-relative name"
-%token  T_NAME_QUALIFIED "namespaced name"
-%token  T_VARIABLE  "variable"
-%token  T_INLINE_HTML
-%token  T_ENCAPSED_AND_WHITESPACE  "string content"
-%token  T_CONSTANT_ENCAPSED_STRING "quoted string"
-%token  T_STRING_VARNAME "variable name"
-%token  T_NUM_STRING "number"
-%token  T_INCLUDE       "'include'"
-%token  T_INCLUDE_ONCE  "'include_once'"
-%token  T_EVAL          "'eval'"
-%token  T_REQUIRE       "'require'"
-%token  T_REQUIRE_ONCE  "'require_once'"
-%token  T_LOGICAL_OR    "'or'"
-%token  T_LOGICAL_XOR   "'xor'"
-%token  T_LOGICAL_AND   "'and'"
-%token  T_PRINT         "'print'"
-%token  T_YIELD         "'yield'"
-%token  T_YIELD_FROM    "'yield from'"
-%token  T_INSTANCEOF    "'instanceof'"
-%token  T_NEW           "'new'"
-%token  T_CLONE         "'clone'"
-%token  T_EXIT          "'exit'"
-%token  T_IF            "'if'"
-%token  T_ELSEIF        "'elseif'"
-%token  T_ELSE          "'else'"
-%token  T_ENDIF         "'endif'"
-%token  T_ECHO          "'echo'"
-%token  T_DO            "'do'"
-%token  T_WHILE         "'while'"
-%token  T_ENDWHILE      "'endwhile'"
-%token  T_FOR           "'for'"
-%token  T_ENDFOR        "'endfor'"
-%token  T_FOREACH       "'foreach'"
-%token  T_ENDFOREACH    "'endforeach'"
-%token  T_DECLARE       "'declare'"
-%token  T_ENDDECLARE    "'enddeclare'"
-%token  T_AS            "'as'"
-%token  T_SWITCH        "'switch'"
-%token  T_ENDSWITCH     "'endswitch'"
-%token  T_CASE          "'case'"
-%token  T_DEFAULT       "'default'"
-%token  T_MATCH         "'match'"
-%token  T_BREAK         "'break'"
-%token  T_CONTINUE      "'continue'"
-%token  T_GOTO          "'goto'"
-%token  T_FUNCTION      "'function'"
-%token  T_FN            "'fn'"
-%token  T_CONST         "'const'"
-%token  T_RETURN        "'return'"
-%token  T_TRY           "'try'"
-%token  T_CATCH         "'catch'"
-%token  T_FINALLY       "'finally'"
-%token  T_THROW         "'throw'"
-%token  T_USE           "'use'"
-%token  T_INSTEADOF     "'insteadof'"
-%token  T_GLOBAL        "'global'"
-%token  T_STATIC        "'static'"
-%token  T_ABSTRACT      "'abstract'"
-%token  T_FINAL         "'final'"
-%token  T_PRIVATE       "'private'"
-%token  T_PROTECTED     "'protected'"
-%token  T_PUBLIC        "'public'"
-%token  T_PRIVATE_SET   "'private(set)'"
-%token  T_PROTECTED_SET "'protected(set)'"
-%token  T_PUBLIC_SET    "'public(set)'"
-%token  T_READONLY      "'readonly'"
-%token  T_VAR           "'var'"
-%token  T_UNSET         "'unset'"
-%token  T_ISSET         "'isset'"
-%token  T_EMPTY         "'empty'"
-%token  T_HALT_COMPILER "'__halt_compiler'"
-%token  T_CLASS         "'class'"
-%token  T_TRAIT         "'trait'"
-%token  T_INTERFACE     "'interface'"
-%token  T_ENUM          "'enum'"
-%token  T_EXTENDS       "'extends'"
-%token  T_IMPLEMENTS    "'implements'"
-%token  T_NAMESPACE     "'namespace'"
-%token  T_LIST            "'list'"
-%token  T_ARRAY           "'array'"
-%token  T_CALLABLE        "'callable'"
-%token  T_LINE            "'__LINE__'"
-%token  T_FILE            "'__FILE__'"
-%token  T_DIR             "'__DIR__'"
-%token  T_CLASS_C         "'__CLASS__'"
-%token  T_TRAIT_C         "'__TRAIT__'"
-%token  T_METHOD_C        "'__METHOD__'"
-%token  T_FUNC_C          "'__FUNCTION__'"
-%token  T_PROPERTY_C      "'__PROPERTY__'"
-%token  T_NS_C            "'__NAMESPACE__'"
-%token END 0 "end of file"
-%token T_ATTRIBUTE    "'#['"
-%token T_PLUS_EQUAL   "'+='"
-%token T_MINUS_EQUAL  "'-='"
-%token T_MUL_EQUAL    "'*='"
-%token T_DIV_EQUAL    "'/='"
-%token T_CONCAT_EQUAL "'.='"
-%token T_MOD_EQUAL    "'%='"
-%token T_AND_EQUAL    "'&='"
-%token T_OR_EQUAL     "'|='"
-%token T_XOR_EQUAL    "'^='"
-%token T_SL_EQUAL     "'<<='"
-%token T_SR_EQUAL     "'>>='"
-%token T_COALESCE_EQUAL "'??='"
-%token T_BOOLEAN_OR   "'||'"
-%token T_BOOLEAN_AND  "'&&'"
-%token T_IS_EQUAL     "'=='"
-%token T_IS_NOT_EQUAL "'!='"
-%token T_IS_IDENTICAL "'==='"
-%token T_IS_NOT_IDENTICAL "'!=='"
-%token T_IS_SMALLER_OR_EQUAL "'<='"
-%token T_IS_GREATER_OR_EQUAL "'>='"
-%token T_SPACESHIP "'<=>'"
-%token T_SL "'<<'"
-%token T_SR "'>>'"
-%token T_INC "'++'"
-%token T_DEC "'--'"
-%token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(float)'"
-%token T_STRING_CAST "'(string)'"
-%token T_ARRAY_CAST  "'(array)'"
-%token T_OBJECT_CAST "'(object)'"
-%token T_BOOL_CAST   "'(bool)'"
-%token T_UNSET_CAST  "'(unset)'"
-%token T_VOID_CAST   "'(void)'"
-%token T_OBJECT_OPERATOR "'->'"
-%token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
-%token T_DOUBLE_ARROW    "'=>'"
-%token T_COMMENT         "comment"
-%token T_DOC_COMMENT     "doc comment"
-%token T_OPEN_TAG        "open tag"
-%token T_OPEN_TAG_WITH_ECHO "'<?='"
-%token T_CLOSE_TAG       "'?>'"
-%token T_WHITESPACE      "whitespace"
-%token T_START_HEREDOC   "heredoc start"
-%token T_END_HEREDOC     "heredoc end"
-%token T_DOLLAR_OPEN_CURLY_BRACES "'${'"
-%token T_CURLY_OPEN      "'{$'"
-%token T_PAAMAYIM_NEKUDOTAYIM "'::'"
-%token T_NS_SEPARATOR    "'\\'"
-%token T_ELLIPSIS        "'...'"
-%token T_COALESCE        "'??'"
-%token T_POW             "'**'"
-%token T_POW_EQUAL       "'**='"
-%token T_PIPE         "'|>'"
-%token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
-%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
-%token T_BAD_CHARACTER   "invalid character"
-%token T_ERROR
+%precedence P_CONSTRUCT
+%precedence P_IF
+%precedence T_ELSE T_ELSEIF
+%precedence P_REFERENCE
+%precedence P_BARE_CALL P_ATOM
+%precedence '(' '[' T_OBJECT_OPERATOR T_NULLSAFE_OBJECT_OPERATOR T_DOUBLE_COLON T_INC T_DEC
+
 %expect 0
 %%
-
-
+/* Independently authored source and statement syntax; see LANGUAGE.md. */
 start:
-    top_statement_list
+    file_items
 ;
-
-reserved_non_modifiers:
-      T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-    | T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
-    | T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
-    | T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
-    | T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
-    | T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-    | T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
-    | T_PROPERTY_C
+file_items:
+    %empty | file_items file_item
 ;
-
-semi_reserved:
-      reserved_non_modifiers
-    | T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
+file_item:
+    block_item
+  | namespace_definition
+  | namespace_import
+  | constant_declaration
+  | attributes constant_declaration
+  | file_halt
 ;
-
-ampersand:
-        T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
-    |	T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
+block_items:
+    %empty | block_items block_item
 ;
-
-identifier:
-        T_STRING
-    | 	semi_reserved
+block_item:
+    statement | function_definition | type_definition
+  | attributes function_definition | attributes type_definition
 ;
-
-top_statement_list:
-        top_statement_list top_statement
-    |	%empty
+block:
+    '{' block_items '}'
 ;
-
-
-namespace_declaration_name:
-        identifier
-    |	T_NAME_QUALIFIED
-;
-
-
-namespace_name:
-        T_STRING
-    |	T_NAME_QUALIFIED
-;
-
-
-legacy_namespace_name:
-        namespace_name
-    |	T_NAME_FULLY_QUALIFIED
-;
-
-name:
-        T_STRING
-    |	T_NAME_QUALIFIED
-    |	T_NAME_FULLY_QUALIFIED
-    |	T_NAME_RELATIVE
-;
-
-attribute_decl:
-        class_name
-
-    |	class_name argument_list
-
-;
-
-attribute_group:
-        attribute_decl
-
-    |	attribute_group ',' attribute_decl
-
-;
-
-attribute:
-        T_ATTRIBUTE attribute_group possible_comma ']'
-;
-
-attributes:
-        attribute
-    |	attributes attribute
-;
-
-attributed_statement:
-        function_declaration_statement
-    |	class_declaration_statement
-    |	trait_declaration_statement
-    |	interface_declaration_statement
-    |	enum_declaration_statement
-;
-
-attributed_top_statement:
-        attributed_statement
-    |	T_CONST const_list ';'
-;
-
-top_statement:
-        statement
-    |	attributed_top_statement
-    |	attributes attributed_top_statement
-    |	T_HALT_COMPILER '(' ')' ';'
-
-    |	T_NAMESPACE namespace_declaration_name ';'
-
-    |	T_NAMESPACE namespace_declaration_name
-        '{' top_statement_list '}'
-
-    |	T_NAMESPACE
-        '{' top_statement_list '}'
-
-    |	T_USE mixed_group_use_declaration ';'
-    |	T_USE use_type group_use_declaration ';'
-    |	T_USE use_declarations ';'
-    |	T_USE use_type use_declarations ';'
-;
-
-use_type:
-        T_FUNCTION
-    | 	T_CONST
-;
-
-group_use_declaration:
-        legacy_namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
-
-;
-
-mixed_group_use_declaration:
-        legacy_namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
-
-;
-
-possible_comma:
-        %empty
-    |	','
-;
-
-inline_use_declarations:
-        inline_use_declarations ',' inline_use_declaration
-
-    |	inline_use_declaration
-
-;
-
-unprefixed_use_declarations:
-        unprefixed_use_declarations ',' unprefixed_use_declaration
-
-    |	unprefixed_use_declaration
-
-;
-
-use_declarations:
-        use_declarations ',' use_declaration
-
-    |	use_declaration
-
-;
-
-inline_use_declaration:
-        unprefixed_use_declaration
-    |	use_type unprefixed_use_declaration
-;
-
-unprefixed_use_declaration:
-        namespace_name
-
-    |	namespace_name T_AS T_STRING
-
-;
-
-use_declaration:
-        legacy_namespace_name
-
-    |	legacy_namespace_name T_AS T_STRING
-
-;
-
-const_list:
-        const_list ',' const_decl
-    |	const_decl
-;
-
-inner_statement_list:
-        inner_statement_list inner_statement
-
-    |	%empty
-
-;
-
-
-inner_statement:
-        statement
-    |	attributed_statement
-    |	attributes attributed_statement
-    |	T_HALT_COMPILER '(' ')' ';'
-
-;
-
-
 statement:
-        '{' inner_statement_list '}'
-    |	if_stmt
-    |	alt_if_stmt
-    |	T_WHILE '(' expr ')' while_statement
-
-    |	T_DO statement T_WHILE '(' expr ')' ';'
-
-    |	T_FOR '(' for_exprs ';' for_cond_exprs ';' for_exprs ')' for_statement
-
-    |	T_SWITCH '(' expr ')' switch_case_list
-
-    |	T_BREAK optional_expr ';'
-    |	T_CONTINUE optional_expr ';'
-    |	T_RETURN optional_expr ';'
-    |	T_GLOBAL global_var_list ';'
-    |	T_STATIC static_var_list ';'
-    |	T_ECHO echo_expr_list ';'
-    |	T_INLINE_HTML
-    |	expr ';'
-    |	T_UNSET '(' unset_variables possible_comma ')' ';'
-    |	T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
-
-    |	T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
-        foreach_statement
-
-    |	T_DECLARE '(' const_list ')'
-
-        declare_statement
-
-    |	';'
-    |	T_TRY '{' inner_statement_list '}' catch_list finally_statement
-
-    |	T_GOTO T_STRING ';'
-    |	T_STRING ':'
-    |	T_VOID_CAST expr ';'
+    ';' | T_INLINE_HTML | block
+  | expression ';'
+  | T_VOID_CAST expression ';'
+  | T_ECHO expression_list ';'
+  | T_RETURN expression_opt ';'
+  | T_BREAK expression_opt ';'
+  | T_CONTINUE expression_opt ';'
+  | T_GOTO T_STRING ';'
+  | T_STRING ':'
+  | T_GLOBAL global_variables ';'
+  | T_STATIC local_bindings ';'
+  | T_UNSET '(' place_list trailing_comma ')' ';'
+  | conditional_statement
+  | while_statement
+  | do_statement
+  | for_statement
+  | foreach_statement
+  | switch_statement
+  | try_statement
+  | declare_statement
 ;
-
-catch_list:
-        %empty
-
-    |	catch_list T_CATCH '(' catch_name_list optional_variable ')' '{' inner_statement_list '}'
-
+global_variables:
+    variable | global_variables ',' variable
 ;
-
-catch_name_list:
-        class_name
-    |	catch_name_list '|' class_name
+local_bindings:
+    local_binding | local_bindings ',' local_binding
 ;
-
-optional_variable:
-        %empty
-    |	T_VARIABLE
+local_binding:
+    T_VARIABLE default_value
 ;
-
-finally_statement:
-        %empty
-    |	T_FINALLY '{' inner_statement_list '}'
+conditional_statement:
+    T_IF '(' expression ')' statement conditional_tail
+  | T_IF '(' expression ')' ':' block_items alternative_conditions alternative_else T_ENDIF ';'
 ;
-
-unset_variables:
-        unset_variable
-    |	unset_variables ',' unset_variable
+conditional_tail:
+    %empty %prec P_IF
+  | T_ELSE statement
+  | T_ELSEIF '(' expression ')' statement conditional_tail
 ;
-
-unset_variable:
-        variable
+alternative_conditions:
+    %empty
+  | alternative_conditions T_ELSEIF '(' expression ')' ':' block_items
 ;
-
-function_name:
-        T_STRING
-    |	T_READONLY
+alternative_else:
+    %empty | T_ELSE ':' block_items
 ;
-
-function_declaration_statement:
-    function returns_ref function_name backup_doc_comment '(' parameter_list ')' return_type
-    backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-
-;
-
-is_reference:
-        %empty
-    |	T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
-;
-
-is_variadic:
-        %empty
-    |	T_ELLIPSIS
-;
-
-class_declaration_statement:
-        class_modifiers T_CLASS
-        T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-
-    |	T_CLASS
-        T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-
-;
-
-class_modifiers:
-        class_modifier
-    |	class_modifiers class_modifier
-
-;
-
-anonymous_class_modifiers:
-        class_modifier
-
-    |	anonymous_class_modifiers class_modifier
-
-;
-
-anonymous_class_modifiers_optional:
-        %empty
-    |	anonymous_class_modifiers
-;
-
-class_modifier:
-        T_ABSTRACT
-    |	T_FINAL
-    |	T_READONLY
-;
-
-trait_declaration_statement:
-        T_TRAIT
-        T_STRING backup_doc_comment '{' class_statement_list '}'
-
-;
-
-interface_declaration_statement:
-        T_INTERFACE
-        T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-
-;
-
-enum_declaration_statement:
-        T_ENUM
-        T_STRING enum_backing_type implements_list backup_doc_comment '{' class_statement_list '}'
-
-;
-
-enum_backing_type:
-        %empty
-    |	':' type_expr
-;
-
-enum_case:
-        T_CASE backup_doc_comment identifier enum_case_expr ';'
-
-;
-
-enum_case_expr:
-        %empty
-    |	'=' expr
-;
-
-extends_from:
-        %empty
-    |	T_EXTENDS class_name
-;
-
-interface_extends_list:
-        %empty
-    |	T_EXTENDS class_name_list
-;
-
-implements_list:
-        %empty
-    |	T_IMPLEMENTS class_name_list
-;
-
-foreach_variable:
-        variable
-    |	ampersand variable
-    |	T_LIST '(' array_pair_list ')'
-    |	'[' array_pair_list ']'
-;
-
-for_statement:
-        statement
-    |	':' inner_statement_list T_ENDFOR ';'
-;
-
-foreach_statement:
-        statement
-    |	':' inner_statement_list T_ENDFOREACH ';'
-;
-
-declare_statement:
-        statement
-    |	':' inner_statement_list T_ENDDECLARE ';'
-;
-
-switch_case_list:
-        '{' case_list '}'
-    |	'{' ';' case_list '}'
-    |	':' case_list T_ENDSWITCH ';'
-    |	':' ';' case_list T_ENDSWITCH ';'
-;
-
-case_list:
-        %empty
-    |	case_list T_CASE expr ':' inner_statement_list
-
-    |	case_list T_CASE expr ';' inner_statement_list
-
-    |	case_list T_DEFAULT ':' inner_statement_list
-
-    |	case_list T_DEFAULT ';' inner_statement_list
-
-;
-
-
-match:
-        T_MATCH '(' expr ')' '{' match_arm_list '}'
-
-;
-
-match_arm_list:
-        %empty
-    |	non_empty_match_arm_list possible_comma
-;
-
-non_empty_match_arm_list:
-        match_arm
-    |	non_empty_match_arm_list ',' match_arm
-;
-
-match_arm:
-        match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
-
-    |	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
-
-;
-
-match_arm_cond_list:
-        expr
-    |	match_arm_cond_list ',' expr
-;
-
-
 while_statement:
-        statement
-    |	':' inner_statement_list T_ENDWHILE ';'
+    T_WHILE '(' expression ')' statement
+  | T_WHILE '(' expression ')' ':' block_items T_ENDWHILE ';'
 ;
-
-
-if_stmt_without_else:
-        T_IF '(' expr ')' statement
-
-    |	if_stmt_without_else T_ELSEIF '(' expr ')' statement
-
+do_statement:
+    T_DO statement T_WHILE '(' expression ')' ';'
 ;
-
-if_stmt:
-        if_stmt_without_else %prec T_NOELSE
-    |	if_stmt_without_else T_ELSE statement
-
+for_statement:
+    T_FOR '(' discarded_expressions ';' for_condition ';' discarded_expressions ')' statement
+  | T_FOR '(' discarded_expressions ';' for_condition ';' discarded_expressions ')' ':' block_items T_ENDFOR ';'
 ;
-
-alt_if_stmt_without_else:
-        T_IF '(' expr ')' ':' inner_statement_list
-
-    |	alt_if_stmt_without_else T_ELSEIF '(' expr ')' ':' inner_statement_list
-
+discarded_expressions:
+    %empty | discarded_list
 ;
-
-alt_if_stmt:
-        alt_if_stmt_without_else T_ENDIF ';'
-    |	alt_if_stmt_without_else T_ELSE ':' inner_statement_list T_ENDIF ';'
-
+discarded_list:
+    discarded_expression | discarded_list ',' discarded_expression
 ;
-
-parameter_list:
-        non_empty_parameter_list possible_comma
-    |	%empty
+discarded_expression:
+    expression | T_VOID_CAST expression
 ;
-
-
-non_empty_parameter_list:
-        attributed_parameter
-
-    |	non_empty_parameter_list ',' attributed_parameter
-
+for_condition:
+    %empty | expression | discarded_list ',' expression
 ;
-
-attributed_parameter:
-        attributes parameter
-    |	parameter
+foreach_statement:
+    T_FOREACH '(' expression T_AS foreach_binding ')' statement
+  | T_FOREACH '(' expression T_AS foreach_binding ')' ':' block_items T_ENDFOREACH ';'
 ;
-
-optional_cpp_modifiers:
-        %empty
-
-    |	non_empty_member_modifiers
-
+foreach_binding:
+    foreach_value | place T_DOUBLE_ARROW foreach_value
 ;
-
-parameter:
-        optional_cpp_modifiers optional_type_without_static
-        is_reference is_variadic T_VARIABLE backup_doc_comment optional_property_hook_list
-
-    |	optional_cpp_modifiers optional_type_without_static
-        is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr optional_property_hook_list
-
+foreach_value:
+    place | reference_mark place | array_literal | list_pattern
 ;
-
-optional_type_without_static:
-        %empty
-    |	type_expr_without_static
+switch_statement:
+    T_SWITCH '(' expression ')' '{' optional_semicolon switch_sections '}'
+  | T_SWITCH '(' expression ')' ':' optional_semicolon switch_sections T_ENDSWITCH ';'
 ;
-
-type_expr:
-        type
-    |	'?' type
-    |	union_type
-    |	intersection_type
+optional_semicolon:
+    %empty | ';'
 ;
-
-type:
-        type_without_static
-    |	T_STATIC
-;
-
-union_type_element:
-                type
-        |        '(' intersection_type ')'
-;
-
-union_type:
-        union_type_element '|' union_type_element
-
-    |	union_type '|' union_type_element
-
-;
-
-intersection_type:
-        type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type
-    |	intersection_type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type
-;
-
-
-
-type_expr_without_static:
-        type_without_static
-    |	'?' type_without_static
-    |	union_type_without_static
-    |	intersection_type_without_static
-;
-
-type_without_static:
-        T_ARRAY
-    |	T_CALLABLE
-    |	name
-;
-
-union_type_without_static_element:
-                type_without_static
-        |        '(' intersection_type_without_static ')'
-;
-
-union_type_without_static:
-        union_type_without_static_element '|' union_type_without_static_element
-
-    |	union_type_without_static '|' union_type_without_static_element
-
-;
-
-intersection_type_without_static:
-        type_without_static T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type_without_static
-
-    |	intersection_type_without_static T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type_without_static
-
-;
-
-return_type:
-        %empty
-    |	':' type_expr
-;
-
-argument_list:
-        '(' ')'
-    |	'(' non_empty_argument_list possible_comma ')'
-    |	'(' T_ELLIPSIS ')'
-;
-
-non_empty_argument_list:
-        argument
-
-    |	non_empty_argument_list ',' argument
-
-;
-
-
-clone_argument_list:
-        '(' ')'
-    |	'(' non_empty_clone_argument_list possible_comma ')'
-    |	'(' expr ',' ')'
-    |	'(' T_ELLIPSIS ')'
-;
-
-non_empty_clone_argument_list:
-        expr ',' argument
-
-    |	argument_no_expr
-
-    |	non_empty_clone_argument_list ',' argument
-
-;
-
-argument_no_expr:
-        identifier ':' expr
-
-    |	T_ELLIPSIS expr
-;
-
-argument:
-        expr
-    |	argument_no_expr
-;
-
-global_var_list:
-        global_var_list ',' global_var
-    |	global_var
-;
-
-global_var:
-    simple_variable
-
-;
-
-
-static_var_list:
-        static_var_list ',' static_var
-    |	static_var
-;
-
-static_var:
-        T_VARIABLE
-    |	T_VARIABLE '=' expr
-;
-
-class_statement_list:
-        class_statement_list class_statement
-
-    |	%empty
-
-;
-
-
-attributed_class_statement:
-        property_modifiers optional_type_without_static property_list ';'
-
-    |	property_modifiers optional_type_without_static hooked_property
-
-    |	class_const_modifiers T_CONST class_const_list ';'
-
-    |	class_const_modifiers T_CONST type_expr class_const_list ';'
-
-    |	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
-        return_type backup_fn_flags method_body backup_fn_flags
-
-    |	enum_case
-;
-
-class_statement:
-        attributed_class_statement
-    |	attributes attributed_class_statement
-    |	T_USE class_name_list trait_adaptations
-
-;
-
-class_name_list:
-        class_name
-    |	class_name_list ',' class_name
-;
-
-trait_adaptations:
-        ';'
-    |	'{' '}'
-    |	'{' trait_adaptation_list '}'
-;
-
-trait_adaptation_list:
-        trait_adaptation
-
-    |	trait_adaptation_list trait_adaptation
-
-;
-
-trait_adaptation:
-        trait_precedence ';'
-    |	trait_alias ';'
-;
-
-trait_precedence:
-    absolute_trait_method_reference T_INSTEADOF class_name_list
-
-;
-
-trait_alias:
-        trait_method_reference T_AS T_STRING
-
-    |	trait_method_reference T_AS reserved_non_modifiers
-
-    |	trait_method_reference T_AS member_modifier identifier
-
-    |	trait_method_reference T_AS member_modifier
-
-;
-
-trait_method_reference:
-        identifier
-
-    |	absolute_trait_method_reference
-;
-
-absolute_trait_method_reference:
-    class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-
-;
-
-method_body:
-        ';'
-    |	'{' inner_statement_list '}'
-;
-
-property_modifiers:
-        non_empty_member_modifiers
-
-    |	T_VAR
-
-;
-
-method_modifiers:
-        %empty
-
-    |	non_empty_member_modifiers
-
-;
-
-class_const_modifiers:
-        %empty
-
-    |	non_empty_member_modifiers
-
-;
-
-non_empty_member_modifiers:
-        member_modifier
-
-    |	non_empty_member_modifiers member_modifier
-
-;
-
-member_modifier:
-        T_PUBLIC
-    |	T_PROTECTED
-    |	T_PRIVATE
-    |	T_PUBLIC_SET
-    |	T_PROTECTED_SET
-    |	T_PRIVATE_SET
-    |	T_STATIC
-    |	T_ABSTRACT
-    |	T_FINAL
-    |	T_READONLY
-;
-
-property_list:
-        property_list ',' property
-    |	property
-;
-
-property:
-        T_VARIABLE backup_doc_comment
-
-    |	T_VARIABLE '=' expr backup_doc_comment
-
-;
-
-hooked_property:
-        T_VARIABLE backup_doc_comment '{' property_hook_list '}'
-
-    |	T_VARIABLE '=' expr backup_doc_comment '{' property_hook_list '}'
-
-;
-
-property_hook_list:
-        %empty
-    |	property_hook_list property_hook
-    |	property_hook_list attributes property_hook
-;
-
-optional_property_hook_list:
-        %empty
-    |	'{' property_hook_list '}'
-;
-
-property_hook_modifiers:
-        %empty
-    |	non_empty_member_modifiers
-;
-
-property_hook:
-        property_hook_modifiers returns_ref T_STRING
-        backup_doc_comment
-        optional_parameter_list backup_fn_flags property_hook_body backup_fn_flags
-;
-
-property_hook_body:
-        ';'
-    |	'{' inner_statement_list '}'
-    |	T_DOUBLE_ARROW expr ';'
-
-;
-
-optional_parameter_list:
-        %empty
-    |	'(' parameter_list ')'
-;
-
-class_const_list:
-        class_const_list ',' class_const_decl
-    |	class_const_decl
-;
-
-class_const_decl:
-        T_STRING '=' expr backup_doc_comment
-    |	semi_reserved '=' expr backup_doc_comment
-;
-
-const_decl:
-    T_STRING '=' expr backup_doc_comment
-;
-
-echo_expr_list:
-        echo_expr_list ',' echo_expr
-    |	echo_expr
-;
-echo_expr:
-    expr
-;
-
-for_cond_exprs:
-        %empty
-    |	non_empty_for_exprs ',' expr
-    |	expr
-;
-
-for_exprs:
-        %empty
-    |	non_empty_for_exprs
-;
-
-non_empty_for_exprs:
-        non_empty_for_exprs ',' expr
-    |	non_empty_for_exprs ',' T_VOID_CAST expr
-    |	T_VOID_CAST expr
-    |	expr
-;
-
-anonymous_class:
-        anonymous_class_modifiers_optional T_CLASS  ctor_arguments
-        extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-;
-
-new_dereferenceable:
-        T_NEW class_name_reference argument_list
-
-    |	T_NEW anonymous_class
-
-    |	T_NEW attributes anonymous_class
-
-;
-
-new_non_dereferenceable:
-        T_NEW class_name_reference
-
-;
-
-expr:
-        variable
-
-    |	T_LIST '(' array_pair_list ')' '=' expr
-
-    |	'[' array_pair_list ']' '=' expr
-
-    |	variable '=' expr
-
-    |	variable '=' ampersand variable
-
-    |	T_CLONE clone_argument_list
-    |	T_CLONE expr
-    |	variable T_PLUS_EQUAL expr
-
-    |	variable T_MINUS_EQUAL expr
-
-    |	variable T_MUL_EQUAL expr
-
-    |	variable T_POW_EQUAL expr
-
-    |	variable T_DIV_EQUAL expr
-
-    |	variable T_CONCAT_EQUAL expr
-
-    |	variable T_MOD_EQUAL expr
-
-    |	variable T_AND_EQUAL expr
-
-    |	variable T_OR_EQUAL expr
-
-    |	variable T_XOR_EQUAL expr
-
-    |	variable T_SL_EQUAL expr
-
-    |	variable T_SR_EQUAL expr
-
-    |	variable T_COALESCE_EQUAL expr
-
-    |	variable T_INC
-    |	T_INC variable
-    |	variable T_DEC
-    |	T_DEC variable
-    |	expr T_BOOLEAN_OR expr
-
-    |	expr T_BOOLEAN_AND expr
-
-    |	expr T_LOGICAL_OR expr
-
-    |	expr T_LOGICAL_AND expr
-
-    |	expr T_LOGICAL_XOR expr
-
-    |	expr '|' expr
-    |	expr T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG expr
-    |	expr T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG expr
-    |	expr '^' expr
-    |	expr '.' expr
-    |	expr '+' expr
-    |	expr '-' expr
-    |	expr '*' expr
-    |	expr T_POW expr
-    |	expr '/' expr
-    |	expr '%' expr
-    | 	expr T_SL expr
-    |	expr T_SR expr
-    |	'+' expr %prec '~'
-    |	'-' expr %prec '~'
-    |	'!' expr
-    |	'~' expr
-    |	expr T_IS_IDENTICAL expr
-
-    |	expr T_IS_NOT_IDENTICAL expr
-
-    |	expr T_IS_EQUAL expr
-
-    |	expr T_IS_NOT_EQUAL expr
-
-    |	expr T_PIPE expr
-
-    |	expr '<' expr
-
-    |	expr T_IS_SMALLER_OR_EQUAL expr
-
-    |	expr '>' expr
-
-    |	expr T_IS_GREATER_OR_EQUAL expr
-
-    |	expr T_SPACESHIP expr
-
-    |	expr T_INSTANCEOF class_name_reference
-
-    |	'(' expr ')'
-    |	new_dereferenceable
-    |	new_non_dereferenceable
-    |	expr '?' expr ':' expr
-
-    |	expr '?' ':' expr
-
-    |	expr T_COALESCE expr
-
-    |	internal_functions_in_yacc
-    |	T_INT_CAST expr
-    |	T_DOUBLE_CAST expr
-    |	T_STRING_CAST expr
-    |	T_ARRAY_CAST expr
-    |	T_OBJECT_CAST expr
-    |	T_BOOL_CAST expr
-    |	T_UNSET_CAST expr
-    |	T_EXIT ctor_arguments
-    |	'@' expr
-    |	scalar
-    |	'`' backticks_expr '`'
-    |	T_PRINT expr
-    |	T_YIELD
-    |	T_YIELD expr
-    |	T_YIELD expr T_DOUBLE_ARROW expr
-    |	T_YIELD_FROM expr
-    |	T_THROW expr
-    |	inline_function
-    |	attributes inline_function
-    |	T_STATIC inline_function
-    |	attributes T_STATIC inline_function
-
-    |	match
-;
-
-
-inline_function:
-        function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
-        backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-
-    |	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
-        T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-
-;
-
-fn:
-    T_FN
-;
-
-function:
-    T_FUNCTION
-;
-
-backup_doc_comment:
+switch_sections:
     %empty
+  | switch_sections T_CASE expression case_separator block_items
+  | switch_sections T_DEFAULT case_separator block_items
+;
+case_separator:
+    ':' | ';'
+;
+try_statement:
+    T_TRY block catch_clauses finally_opt
+  | T_TRY block T_FINALLY block
+;
+catch_clauses:
+    catch_clause | catch_clauses catch_clause
+;
+catch_clause:
+    T_CATCH '(' catch_types catch_variable ')' block
+;
+catch_types:
+    name | catch_types '|' name
+;
+catch_variable:
+    %empty | T_VARIABLE
+;
+finally_opt:
+    %empty | T_FINALLY block
+;
+declare_statement:
+    T_DECLARE '(' directives ')' statement
+  | T_DECLARE '(' directives ')' ':' block_items T_ENDDECLARE ';'
+;
+directives:
+    directive | directives ',' directive
+;
+directive:
+    T_STRING '=' expression
+;
+file_halt:
+    T_HALT_COMPILER '(' ')' ';'
 ;
 
-backup_fn_flags:
-    %prec PREC_ARROW_FUNCTION %empty
+place_list:
+    place | place_list ',' place
 ;
 
-backup_lex_pos:
-    %empty
+/* Independently authored expression syntax; see LANGUAGE.md. No engine grammar input. */
+expression:
+    postfix %prec P_ATOM
+  | place '=' expression
+  | place assignment_operator expression %prec '='
+  | reference_assignment
+  | expression T_LOGICAL_OR expression
+  | expression T_LOGICAL_XOR expression
+  | expression T_LOGICAL_AND expression
+  | expression T_BOOLEAN_OR expression
+  | expression T_BOOLEAN_AND expression
+  | expression '|' expression
+  | expression '^' expression
+  | expression reference_mark expression %prec P_BIT_AND
+  | expression T_IS_EQUAL expression
+  | expression T_IS_NOT_EQUAL expression
+  | expression T_IS_IDENTICAL expression
+  | expression T_IS_NOT_IDENTICAL expression
+  | expression T_SPACESHIP expression
+  | expression '<' expression
+  | expression '>' expression
+  | expression T_IS_SMALLER_OR_EQUAL expression
+  | expression T_IS_GREATER_OR_EQUAL expression
+  | expression T_PIPE expression
+  | expression '.' expression
+  | expression T_SL expression
+  | expression T_SR expression
+  | expression '+' expression
+  | expression '-' expression
+  | expression '*' expression
+  | expression '/' expression
+  | expression '%' expression
+  | expression T_POW expression
+  | expression T_COALESCE expression
+  | expression T_INSTANCEOF class_target
+  | expression '?' expression ':' expression
+  | expression '?' ':' expression
+  | '+' expression %prec P_UNARY
+  | '-' expression %prec P_UNARY
+  | '!' expression
+  | '~' expression %prec P_UNARY
+  | '@' expression %prec P_UNARY
+  | cast_operator expression %prec P_UNARY
+  | prefix_mutation
+  | place T_INC
+  | place T_DEC
+  | T_NEW class_target %prec P_CONSTRUCT
+  | T_CLONE expression %prec P_CONSTRUCT
+  | T_PRINT expression
+  | T_THROW expression
+  | T_INCLUDE expression
+  | T_INCLUDE_ONCE expression
+  | T_REQUIRE expression
+  | T_REQUIRE_ONCE expression
+  | T_YIELD
+  | T_YIELD expression
+  | T_YIELD expression T_DOUBLE_ARROW expression
+  | T_YIELD_FROM expression
+  | T_EXIT call_arguments_opt
+  | array_literal '=' expression
+  | list_pattern '=' expression
 ;
-
-returns_ref:
-        %empty
-    |	ampersand
+assignment_operator:
+    T_PLUS_EQUAL | T_MINUS_EQUAL | T_MUL_EQUAL | T_DIV_EQUAL | T_MOD_EQUAL
+  | T_CONCAT_EQUAL | T_AND_EQUAL | T_OR_EQUAL | T_XOR_EQUAL
+  | T_SL_EQUAL | T_SR_EQUAL | T_POW_EQUAL | T_COALESCE_EQUAL
 ;
-
-lexical_vars:
-        %empty
-    |	T_USE '(' lexical_var_list possible_comma ')'
+reference_mark:
+    T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
+  | T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
 ;
-
-lexical_var_list:
-        lexical_var_list ',' lexical_var
-    |	lexical_var
+cast_operator:
+    T_INT_CAST | T_DOUBLE_CAST | T_STRING_CAST | T_ARRAY_CAST
+  | T_OBJECT_CAST | T_BOOL_CAST | T_UNSET_CAST
 ;
-
-lexical_var:
-        T_VARIABLE
-    |	ampersand T_VARIABLE
+postfix:
+    atom
+  | place
+  | postfix T_DOUBLE_COLON member_identifier
+  | postfix T_DOUBLE_COLON '{' expression '}'
 ;
-
-function_call:
-        name argument_list
-
-    |	T_READONLY argument_list
-    |	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
-
-    |	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
-
-    |	callable_expr  argument_list
+place:
+    variable
+  | postfix call_arguments
+  | postfix T_NULLSAFE_OBJECT_OPERATOR property_selector
+  | postfix '[' expression_opt ']'
+  | postfix T_OBJECT_OPERATOR property_selector
+  | postfix T_DOUBLE_COLON variable
 ;
-
-class_name:
-        T_STATIC
-
-    |	name
+property_selector:
+    T_STRING | variable | '{' expression '}'
 ;
-
-class_name_reference:
-        class_name
-    |	new_variable
-    |	'(' expr ')'
+atom:
+    name
+  | literal
+  | '(' expression ')'
+  | array_literal
+  | closure_expression
+  | arrow_expression
+  | constructed_object
+  | match_expression
+  | T_ISSET '(' expression_list trailing_comma ')'
+  | T_EMPTY '(' expression ')'
+  | T_EVAL '(' expression ')'
+  | T_CLONE clone_arguments
 ;
-
-backticks_expr:
-        %empty
-
-    |	T_ENCAPSED_AND_WHITESPACE
-    |	encaps_list
+name:
+    T_STRING | T_NAME_QUALIFIED | T_NAME_FULLY_QUALIFIED | T_NAME_RELATIVE
 ;
-
-
-ctor_arguments:
-        %empty
-    |	argument_list
-;
-
-
-dereferenceable_scalar:
-        T_ARRAY '(' array_pair_list ')'
-    |	'[' array_pair_list ']'
-    |	T_CONSTANT_ENCAPSED_STRING
-    |	'"' encaps_list '"'
-;
-
-scalar:
-        T_LNUMBER
-    |	T_DNUMBER
-    |	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC
-    |	T_START_HEREDOC T_END_HEREDOC
-
-    |	T_START_HEREDOC encaps_list T_END_HEREDOC
-    |	dereferenceable_scalar
-    |	constant
-    |	class_constant
-;
-
-constant:
-        name
-    |	T_LINE
-    |	T_FILE
-    |	T_DIR
-    |	T_TRAIT_C
-    |	T_METHOD_C
-    |	T_FUNC_C
-    |	T_PROPERTY_C
-    |	T_NS_C
-    |	T_CLASS_C
-;
-
-class_constant:
-        class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-
-    |	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-
-    |	class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
-
-    |	variable_class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
-
-;
-
-optional_expr:
-        %empty
-    |	expr
-;
-
-variable_class_name:
-        fully_dereferenceable
-;
-
-fully_dereferenceable:
-        variable
-    |	'(' expr ')'
-    |	dereferenceable_scalar
-    |	class_constant
-    |	new_dereferenceable
-;
-
-array_object_dereferenceable:
-        fully_dereferenceable
-    |	constant
-;
-
-callable_expr:
-        callable_variable
-    |	'(' expr ')'
-    |	dereferenceable_scalar
-    |	new_dereferenceable
-;
-
-callable_variable:
-        simple_variable
-
-    |	array_object_dereferenceable '[' optional_expr ']'
-
-    |	array_object_dereferenceable T_OBJECT_OPERATOR property_name argument_list
-
-    |	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
-
-    |	function_call
-;
-
 variable:
-        callable_variable
-
-    |	static_member
-
-    |	array_object_dereferenceable T_OBJECT_OPERATOR property_name
-
-    |	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name
-
+    T_VARIABLE
+  | '$' variable
+  | '$' '{' expression '}'
+;
+member_selector:
+    member_identifier
+  | variable
+  | '{' expression '}'
+;
+call_arguments_opt:
+    %empty %prec P_BARE_CALL | call_arguments
+;
+call_arguments:
+    '(' ')'
+  | '(' argument_list trailing_comma ')'
+  | '(' T_ELLIPSIS ')'
+;
+argument_list:
+    argument | argument_list ',' argument
+;
+argument:
+    expression
+  | member_identifier ':' expression
+  | T_ELLIPSIS expression
+;
+clone_arguments:
+    '(' ')'
+  | '(' T_ELLIPSIS ')'
+  | '(' named_or_spread_list trailing_comma ')'
+  | '(' expression ',' ')'
+  | '(' expression ',' argument_list trailing_comma ')'
+;
+named_or_spread_list:
+    named_or_spread_argument
+  | named_or_spread_list ',' argument
+;
+named_or_spread_argument:
+    member_identifier ':' expression
+  | T_ELLIPSIS expression
+;
+array_literal:
+    '[' array_slots ']'
+  | T_ARRAY '(' array_slots ')'
+;
+array_slots:
+    array_entries
+;
+array_entries:
+    array_entry | array_entries ',' array_entry
+;
+array_entry:
+    %empty
+  | expression
+  | reference_mark expression
+  | expression T_DOUBLE_ARROW expression
+  | expression T_DOUBLE_ARROW reference_mark expression
+  | T_ELLIPSIS expression
+;
+list_pattern:
+    T_LIST '(' pattern_slots ')'
+;
+pattern_slots:
+    pattern_entries
+;
+pattern_entries:
+    pattern_entry | pattern_entries ',' pattern_entry
+;
+pattern_entry:
+    %empty | expression | list_pattern | reference_mark expression
+  | expression T_DOUBLE_ARROW expression
+  | expression T_DOUBLE_ARROW list_pattern
+  | expression T_DOUBLE_ARROW reference_mark expression
+;
+class_target:
+    name | variable | '(' expression ')'
+  | class_target '[' expression ']'
+  | class_target T_OBJECT_OPERATOR property_selector
+  | class_target T_DOUBLE_COLON member_selector
+;
+constructed_object:
+    T_NEW class_target call_arguments
+  | T_NEW anonymous_object
+;
+anonymous_object:
+    attributes_opt anonymous_modifiers T_CLASS call_arguments_opt class_parent interfaces class_body
+;
+anonymous_modifiers:
+    %empty | T_READONLY
+;
+closure_expression:
+    T_FUNCTION reference_opt parameter_clause captures return_annotation block
+  | T_STATIC T_FUNCTION reference_opt parameter_clause captures return_annotation block
+  | attributes T_FUNCTION reference_opt parameter_clause captures return_annotation block
+  | attributes T_STATIC T_FUNCTION reference_opt parameter_clause captures return_annotation block
+;
+captures:
+    %empty | T_USE '(' capture_list trailing_comma ')'
+;
+capture_list:
+    capture | capture_list ',' capture
+;
+capture:
+    reference_opt T_VARIABLE
+;
+arrow_expression:
+    T_FN reference_opt parameter_clause return_annotation T_DOUBLE_ARROW expression %prec P_ARROW
+  | T_STATIC T_FN reference_opt parameter_clause return_annotation T_DOUBLE_ARROW expression %prec P_ARROW
+  | attributes T_FN reference_opt parameter_clause return_annotation T_DOUBLE_ARROW expression %prec P_ARROW
+  | attributes T_STATIC T_FN reference_opt parameter_clause return_annotation T_DOUBLE_ARROW expression %prec P_ARROW
+;
+match_expression:
+    T_MATCH '(' expression ')' '{' match_arms '}'
+;
+match_arms:
+    %empty | match_arm_list trailing_comma
+;
+match_arm_list:
+    match_arm | match_arm_list ',' match_arm
+;
+match_arm:
+    expression_list T_DOUBLE_ARROW expression
+  | T_DEFAULT T_DOUBLE_ARROW expression
+  | T_DEFAULT ',' T_DOUBLE_ARROW expression
+;
+literal:
+    T_LNUMBER | T_DNUMBER | T_CONSTANT_ENCAPSED_STRING
+  | T_LINE | T_FILE | T_DIR | T_CLASS_C | T_TRAIT_C | T_METHOD_C
+  | T_FUNC_C | T_NS_C | T_PROPERTY_C
+  | '"' interpolated_parts '"'
+  | '`' interpolated_parts '`'
+  | T_START_HEREDOC interpolated_parts T_END_HEREDOC
+;
+interpolated_parts:
+    %empty | interpolated_parts interpolated_part
+;
+interpolated_part:
+    T_ENCAPSED_AND_WHITESPACE
+  | T_VARIABLE
+  | T_VARIABLE '[' interpolation_index ']'
+  | T_VARIABLE T_OBJECT_OPERATOR T_STRING
+  | T_VARIABLE T_NULLSAFE_OBJECT_OPERATOR T_STRING
+  | T_CURLY_OPEN expression '}'
+  | T_DOLLAR_OPEN_CURLY_BRACES expression '}'
+  | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
+  | T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expression ']' '}'
+;
+interpolation_index:
+    T_STRING | T_NUM_STRING | T_VARIABLE | '-' T_NUM_STRING
+;
+expression_opt:
+    %empty | expression
+;
+expression_list:
+    expression | expression_list ',' expression
+;
+trailing_comma:
+    %empty | ','
 ;
 
-simple_variable:
-        T_VARIABLE
-    |	'$' '{' expr '}'
-    |	'$' simple_variable
+prefix_mutation:
+    T_INC expression %prec P_UNARY
+  | T_DEC expression %prec P_UNARY
+;
+reference_assignment:
+    place '=' reference_mark expression %prec P_REFERENCE
 ;
 
-static_member:
-        class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-
-    |	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-
+/* Independently authored declarations and types; see LANGUAGE.md. */
+function_definition:
+    T_FUNCTION reference_opt T_STRING parameter_clause return_annotation block
+;
+reference_opt:
+    %empty | reference_mark
+;
+parameter_clause:
+    '(' ')' | '(' parameters trailing_comma ')'
+;
+parameters:
+    parameter | parameters ',' parameter
+;
+parameter:
+    attributes_opt promotion_modifiers type_opt parameter_reference_opt variadic_opt T_VARIABLE default_value parameter_hooks
+;
+promotion_modifiers:
+    %empty | promotion_modifiers member_modifier
+;
+parameter_reference_opt:
+    %empty | T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
+;
+variadic_opt:
+    %empty | T_ELLIPSIS
+;
+default_value:
+    %empty | '=' expression
+;
+parameter_hooks:
+    %empty | hook_body
+;
+return_annotation:
+    %empty | ':' return_type
+;
+return_type:
+    return_simple | '?' return_simple | return_intersection | return_union
+;
+return_simple:
+    simple_type | T_STATIC
+;
+return_intersection:
+    return_simple T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG return_simple
+  | return_intersection T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG return_simple
+;
+return_union:
+    return_union_part '|' return_union_part | return_union '|' return_union_part
+;
+return_union_part:
+    return_simple | '(' return_intersection ')'
+;
+type_opt:
+    %empty | type
+;
+type:
+    simple_type
+  | '?' simple_type
+  | intersection_type
+  | union_type
+;
+simple_type:
+    name | T_ARRAY | T_CALLABLE
+;
+intersection_type:
+    simple_type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG simple_type
+  | intersection_type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG simple_type
+;
+union_type:
+    union_part '|' union_part
+  | union_type '|' union_part
+;
+union_part:
+    simple_type | '(' intersection_type ')'
+;
+type_definition:
+    class_modifiers T_CLASS T_STRING class_parent interfaces class_body
+  | T_INTERFACE T_STRING interface_parents class_body
+  | T_TRAIT T_STRING class_body
+  | T_ENUM T_STRING enum_backing interfaces class_body
+;
+class_modifiers:
+    %empty | class_modifiers class_modifier
+;
+class_modifier:
+    T_ABSTRACT | T_FINAL | T_READONLY
+;
+class_parent:
+    %empty | T_EXTENDS name
+;
+interfaces:
+    %empty | T_IMPLEMENTS name_list
+;
+interface_parents:
+    %empty | T_EXTENDS name_list
+;
+name_list:
+    name | name_list ',' name
+;
+enum_backing:
+    %empty | ':' T_STRING
+;
+class_body:
+    '{' members '}'
+;
+members:
+    %empty | members member
+;
+member:
+    attributes_opt property_header type_opt property_list ';'
+  | attributes_opt property_header type_opt T_VARIABLE default_value hook_body
+  | attributes_opt method_modifiers T_FUNCTION reference_opt member_identifier parameter_clause return_annotation method_body
+  | attributes_opt method_modifiers T_CONST constant_bindings ';'
+  | attributes_opt method_modifiers T_CONST type constant_bindings ';'
+  | trait_import
+  | attributes_opt T_CASE T_STRING default_value ';'
+;
+property_header:
+    member_modifiers | T_VAR
+;
+method_modifiers:
+    %empty | member_modifiers
+;
+member_modifiers:
+    member_modifier | member_modifiers member_modifier
+;
+member_modifier:
+    T_PUBLIC | T_PROTECTED | T_PRIVATE | T_STATIC | T_ABSTRACT | T_FINAL | T_READONLY
+  | T_PUBLIC_SET | T_PROTECTED_SET | T_PRIVATE_SET
+;
+property_list:
+    property_binding | property_list ',' property_binding
+;
+property_binding:
+    T_VARIABLE default_value
+;
+method_body:
+    ';' | block
+;
+hook_body:
+    '{' hooks '}'
+;
+hooks:
+    %empty | hooks hook
+;
+hook:
+    attributes_opt method_modifiers reference_opt T_STRING hook_parameters hook_implementation
+;
+hook_parameters:
+    %empty | parameter_clause
+;
+hook_implementation:
+    ';' | block | T_DOUBLE_ARROW expression ';'
+;
+trait_import:
+    T_USE name_list ';'
+  | T_USE name_list '{' trait_adjustments '}'
+;
+trait_adjustments:
+    %empty | trait_adjustments trait_adjustment
+;
+trait_adjustment:
+    trait_method T_INSTEADOF name_list ';'
+  | trait_method T_AS alias_identifier ';'
+  | trait_method T_AS trait_modifier member_identifier ';'
+  | trait_method T_AS trait_modifier ';'
+;
+trait_modifier:
+    T_PUBLIC | T_PRIVATE | T_PROTECTED | T_FINAL
+;
+trait_method:
+    member_identifier | name T_DOUBLE_COLON member_identifier
+;
+constant_declaration:
+    T_CONST constant_bindings ';'
+;
+constant_bindings:
+    constant_binding | constant_bindings ',' constant_binding
+;
+constant_binding:
+    T_STRING '=' expression
+;
+namespace_definition:
+    T_NAMESPACE namespace_path ';'
+  | T_NAMESPACE namespace_path '{' file_items '}'
+  | T_NAMESPACE '{' file_items '}'
+;
+namespace_path:
+    T_STRING | T_NAME_QUALIFIED
+;
+namespace_import:
+    T_USE import_kind imports ';'
+  | T_USE import_kind import_prefix '{' group_imports trailing_comma '}' ';'
+;
+import_kind:
+    %empty | T_FUNCTION | T_CONST
+;
+imports:
+    import_entry | imports ',' import_entry
+;
+import_entry:
+    name import_alias
+;
+import_alias:
+    %empty | T_AS T_STRING
+;
+import_prefix:
+    name T_NS_SEPARATOR
+;
+group_imports:
+    group_import | group_imports ',' group_import
+;
+group_import:
+    import_kind namespace_path import_alias
+;
+attributes_opt:
+    %empty | attributes
+;
+attributes:
+    attribute_group | attributes attribute_group
+;
+attribute_group:
+    T_ATTRIBUTE attribute_list trailing_comma ']'
+;
+attribute_list:
+    attribute | attribute_list ',' attribute
+;
+attribute:
+    name call_arguments_opt
+;
+member_identifier:
+    T_STRING
+  | T_ABSTRACT | T_ARRAY | T_AS | T_BREAK | T_CALLABLE | T_CASE | T_CATCH | T_CLASS
+  | T_CLONE | T_CONST | T_CONTINUE | T_DECLARE | T_DEFAULT | T_DO | T_ECHO | T_ELSE
+  | T_ELSEIF | T_EMPTY | T_ENDDECLARE | T_ENDFOR | T_ENDFOREACH | T_ENDIF
+  | T_ENDSWITCH | T_ENDWHILE | T_ENUM | T_EVAL | T_EXIT | T_EXTENDS | T_FINAL
+  | T_FINALLY | T_FN | T_FOR | T_FOREACH | T_FUNCTION | T_GLOBAL | T_GOTO
+  | T_IF | T_IMPLEMENTS | T_INCLUDE | T_INCLUDE_ONCE | T_INSTANCEOF | T_INSTEADOF
+  | T_INTERFACE | T_ISSET | T_LIST | T_LOGICAL_AND | T_LOGICAL_OR | T_LOGICAL_XOR
+  | T_MATCH | T_NAMESPACE | T_NEW | T_PRINT | T_PRIVATE | T_PROTECTED | T_PUBLIC
+  | T_READONLY | T_REQUIRE | T_REQUIRE_ONCE | T_RETURN | T_STATIC | T_SWITCH
+  | T_THROW | T_TRAIT | T_TRY | T_UNSET | T_USE | T_VAR | T_WHILE | T_YIELD
+  | T_CLASS_C | T_DIR | T_FILE | T_FUNC_C | T_LINE | T_METHOD_C | T_NS_C | T_TRAIT_C
+  | T_PROPERTY_C
 ;
 
-new_variable:
-        simple_variable
-
-    |	new_variable '[' optional_expr ']'
-
-    |	new_variable T_OBJECT_OPERATOR property_name
-
-    |	new_variable T_NULLSAFE_OBJECT_OPERATOR property_name
-
-    |	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-
-    |	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
-
+alias_identifier:
+    T_STRING | T_ARRAY | T_AS | T_BREAK | T_CALLABLE | T_CASE | T_CATCH | T_CLASS | T_CLONE | T_CONST | T_CONTINUE | T_DECLARE | T_DEFAULT | T_DO | T_ECHO | T_ELSE | T_ELSEIF | T_EMPTY | T_ENDDECLARE | T_ENDFOR | T_ENDFOREACH | T_ENDIF | T_ENDSWITCH | T_ENDWHILE | T_ENUM | T_EVAL | T_EXIT | T_EXTENDS | T_FINALLY | T_FN | T_FOR | T_FOREACH | T_FUNCTION | T_GLOBAL | T_GOTO | T_IF | T_IMPLEMENTS | T_INCLUDE | T_INCLUDE_ONCE | T_INSTANCEOF | T_INSTEADOF | T_INTERFACE | T_ISSET | T_LIST | T_LOGICAL_AND | T_LOGICAL_OR | T_LOGICAL_XOR | T_MATCH | T_NAMESPACE | T_NEW | T_PRINT | T_REQUIRE | T_REQUIRE_ONCE | T_RETURN | T_SWITCH | T_THROW | T_TRAIT | T_TRY | T_UNSET | T_USE | T_VAR | T_WHILE | T_YIELD | T_CLASS_C | T_DIR | T_FILE | T_FUNC_C | T_LINE | T_METHOD_C | T_NS_C | T_TRAIT_C | T_PROPERTY_C
 ;
-
-member_name:
-        identifier
-    |	'{' expr '}'
-    |	simple_variable
-;
-
-property_name:
-        T_STRING
-    |	'{' expr '}'
-    |	simple_variable
-;
-
-array_pair_list:
-        non_empty_array_pair_list
-
-;
-
-possible_array_pair:
-        %empty
-    |	array_pair
-;
-
-non_empty_array_pair_list:
-        non_empty_array_pair_list ',' possible_array_pair
-
-    |	possible_array_pair
-
-;
-
-array_pair:
-        expr T_DOUBLE_ARROW expr
-
-    |	expr
-
-    |	expr T_DOUBLE_ARROW ampersand variable
-
-    |	ampersand variable
-
-    |	T_ELLIPSIS expr
-
-    |	expr T_DOUBLE_ARROW T_LIST '(' array_pair_list ')'
-
-    |	T_LIST '(' array_pair_list ')'
-
-;
-
-encaps_list:
-        encaps_list encaps_var
-
-    |	encaps_list T_ENCAPSED_AND_WHITESPACE
-
-    |	encaps_var
-
-    |	T_ENCAPSED_AND_WHITESPACE encaps_var
-
-;
-
-encaps_var:
-        T_VARIABLE
-
-    |	T_VARIABLE '[' encaps_var_offset ']'
-
-    |	T_VARIABLE T_OBJECT_OPERATOR T_STRING
-
-    |	T_VARIABLE T_NULLSAFE_OBJECT_OPERATOR T_STRING
-
-    |	T_DOLLAR_OPEN_CURLY_BRACES expr '}'
-
-    |	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
-
-    |	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
-
-    |	T_CURLY_OPEN variable '}'
-;
-
-encaps_var_offset:
-        T_STRING
-    |	T_NUM_STRING
-    |	'-' T_NUM_STRING
-    |	T_VARIABLE
-;
-
-
-internal_functions_in_yacc:
-        T_ISSET '(' isset_variables possible_comma ')'
-    |	T_EMPTY '(' expr ')'
-    |	T_INCLUDE expr
-
-    |	T_INCLUDE_ONCE expr
-
-    |	T_EVAL '(' expr ')'
-
-    |	T_REQUIRE expr
-
-    |	T_REQUIRE_ONCE expr
-
-;
-
-isset_variables:
-        isset_variable
-    |	isset_variables ',' isset_variable
-
-;
-
-isset_variable:
-        expr
-;
-
 
 %%

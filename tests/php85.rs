@@ -1,4 +1,4 @@
-//! PHP 8.5 fixtures are specified against the pinned grammar, not the PHP 8.3 oracle.
+//! Independent PHP 8.5 fixtures follow the language contract, not a PHP 8.3 oracle.
 mod common;
 use phprs::{
     PhpParser,
@@ -121,5 +121,41 @@ fn void_cast_invalid_values_phprs_046() {
             PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
             "{source}"
         );
+    }
+}
+
+fn binary_group(source: &str, operator: &str, left: &str, right: &str) {
+    let input = format!("<?php {source};");
+    let tree = PhpParser.parse(input.as_bytes(), DEFAULT_OPTIONS).unwrap();
+    common::verify_tree(&tree);
+    let grouped = format!("{left}{operator}{right}");
+    for node in tree.nodes.iter().filter(|node| node.children.len() == 3) {
+        if input[node.span.clone()] != grouped {
+            continue;
+        }
+        let children = &tree.edges[node.children.clone()];
+        assert_eq!(&input[tree.nodes[children[0]].span.clone()], left);
+        assert_eq!(&input[tree.nodes[children[1]].span.clone()], operator);
+        assert_eq!(&input[tree.nodes[children[2]].span.clone()], right);
+        return;
+    }
+    panic!("missing grouping {grouped:?} in {source:?}");
+}
+
+#[test]
+fn independent_operator_grouping_phprs_093() {
+    for (source, operator, left, right) in [
+        ("1+2*3", "+", "1", "2*3"),
+        ("1*2+3", "+", "1*2", "3"),
+        ("2**3**4", "**", "2", "3**4"),
+        ("-2**2", "**", "2", "2"),
+        ("$a=$b=$c", "=", "$a", "$b=$c"),
+        ("$a??$b??$c", "??", "$a", "$b??$c"),
+        ("$a.$b<<2", ".", "$a", "$b<<2"),
+        ("$a.$b|>f(...)", "|>", "$a.$b", "f(...)"),
+        ("$a|>f(...)|>g(...)", "|>", "$a|>f(...)", "g(...)"),
+        ("$a&$b==$c", "&", "$a", "$b==$c"),
+    ] {
+        binary_group(source, operator, left, right);
     }
 }

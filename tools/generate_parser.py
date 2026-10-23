@@ -10,32 +10,25 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'grammar/php-8.5.0/zend_language_parser.y'
-PARTS = re.compile(r"'(?:\\.|[^'\\])*'|\"(?:\\.|[^\"\\])*\"|/\*.*?\*/|//[^\n]*|[{}]|[^'\"/{}]+|.", re.S)
+SOURCE = ROOT / 'grammar/independent'
+VOCABULARY = ROOT / 'grammar/vocabulary.json'
 
 
-def remove_actions(body):
-    depth = 0
-    result = []
-    for match in PARTS.finditer(body):
-        text = match.group()
-        if text.startswith(('/*', '//')):
-            continue
-        if text == '{':
-            depth += 1
-        elif text == '}':
-            depth -= 1
-        elif depth == 0:
-            result.append(text)
-    assert depth == 0
-    return ''.join(result)
+def validate_fragment(text):
+    literals = r"'(?:\\.|[^'\\])*'|\"(?:\\.|[^\"\\])*\"|/\*.*?\*/"
+    remainder = re.sub(literals, '', text, flags=re.S)
+    if '{' in remainder or '}' in remainder or '%code' in remainder:
+        raise ValueError('Grammar fragments must not contain semantic actions or embedded code')
 
 
-def grammar_text(source):
-    header, body, _ = source.split('%%', 2)
-    directives = re.findall(r'^%(?:precedence|left|right|nonassoc|token)\b[^\n]*', header, re.M)
-    declarations = re.sub(r'<(?:ast|ident|num|ptr|str)>', '', '\n'.join(directives))
-    return normalize_grammar(declarations + '\n%expect 0\n%%\n' + remove_actions(body) + '\n%%\n')
+def grammar_text(vocabulary):
+    declarations = ''.join('%token ' + name + '\n' for name in vocabulary['tokens'])
+    precedence = (SOURCE / 'precedence.y').read_text()
+    sections = [(SOURCE / (name + '.y')).read_text() for name in ['statements', 'expressions', 'declarations']]
+    for section in [precedence, *sections]:
+        validate_fragment(section)
+    text = '%start start\n' + declarations + precedence + '\n%expect 0\n%%\n' + '\n'.join(sections) + '\n%%\n'
+    return normalize_grammar(text)
 
 
 def normalize_grammar(text):
@@ -91,41 +84,28 @@ def rust_array(name, kind, entries):
     return f'pub(crate) static {name}: &[{kind}] = &[\n' + ''.join('    ' + row + ',\n' for row in rows) + '];\n'
 
 
-def token_declarations():
-    header = SOURCE.read_text().split('%%', 1)[0]
-    pattern = r'^%token(?:\s+<\w+>)?\s+(\w+)(?:[ \t]+\d+)?(?:[ \t]+("(?:\\.|[^"\\])*"))?'
-    return re.findall(pattern, header, re.M)
-
-
-def lexical_maps(declarations, symbols):
-    keywords, operators = [], []
-    for name, alias in declarations:
-        label = json.loads(alias) if alias else ''
-        if not (label.startswith("'") and label.endswith("'")):
-            continue
-        text = label[1:-1]
-        if re.fullmatch(r'[a-zA-Z_]+', text):
-            keywords.append((text.lower(), symbols[alias]))
-        elif text not in {'<?=', '?>', '${', '{$', '\\\\'} and not text.startswith('('):
-            operators.append((text, symbols[alias]))
-    entries = [f'({json.dumps(text)}, {number})' for text, number in sorted(keywords)]
+def lexical_maps(vocabulary, symbols):
+    entries = [f'({json.dumps(text)}, {symbols[name]})' for text, name in sorted(vocabulary['keywords'].items())]
     output = rust_array('KEYWORDS', '(&str, u16)', entries)
-    entries = [f'(b{json.dumps(text)}, {number})' for text, number in sorted(operators, key=lambda item: (-len(item[0]), item[0]))]
-    return output + rust_array('OPERATORS', '(&[u8], u16)', entries)
+    operators = sorted(vocabulary['operators'].items(), key=lambda item: (-len(item[0]), item[0]))
+    entries = [f'(b{json.dumps(text)}, {symbols[name]})' for text, name in operators]
+    output += rust_array('OPERATORS', '(&[u8], u16)', entries)
+    entries = [f'(b{json.dumps(text)}, {symbols[name]})' for text, name in sorted(vocabulary['casts'].items())]
+    return output + rust_array('CASTS', '(&[u8], u16)', entries)
 
 
-def symbol_data(report):
+def symbol_data(report, vocabulary):
     elements = report.findall('./grammar/terminals/terminal') + report.findall('./grammar/nonterminals/nonterminal')
     symbols = {item.get('name'): int(item.get('symbol-number')) for item in elements}
-    declarations = token_declarations()
-    tokens = ['// Generated from the PHP 8.5.0 grammar. See grammar/README.md.\n']
-    for name, alias in declarations:
-        tokens.append(f'pub const {name}: u16 = {symbols[alias or name]};\n')
+    declarations = vocabulary['tokens']
+    tokens = ['// Generated from independent language contracts. See LANGUAGE.md.\n']
+    for name in declarations:
+        tokens.append(f'pub const {name}: u16 = {symbols[name]};\n')
     punctuation = [(ord(ast.literal_eval(name)), number) for name, number in symbols.items() if name.startswith("'")]
     tokens.append(rust_array('PUNCTUATION', '(u8, u16)', list(map(str, sorted(punctuation)))))
-    entries = [f'({name}, {json.dumps(name)})' for name, _ in declarations]
+    entries = [f'({name}, {json.dumps(name)})' for name in declarations]
     tokens.append(rust_array('TOKEN_NAMES', '(u16, &str)', entries))
-    tokens.append(lexical_maps(declarations, symbols))
+    tokens.append(lexical_maps(vocabulary, symbols))
     return symbols, ''.join(tokens)
 
 
@@ -172,12 +152,13 @@ def generate(check=False):
         directory = Path(temporary)
         grammar = directory / 'syntax.y'
         report = directory / 'syntax.xml'
-        grammar.write_text(grammar_text(SOURCE.read_text()))
+        vocabulary = json.loads(VOCABULARY.read_text())
+        grammar.write_text(grammar_text(vocabulary))
         subprocess.run(['bison', '--xml=' + str(report), '-o', str(directory / 'syntax.c'), str(grammar)], check=True)
         root = ET.parse(report).getroot()
-        symbols, tokens = symbol_data(root)
+        symbols, tokens = symbol_data(root, vocabulary)
         output = '// Generated by tools/generate_parser.py; do not edit.\n'
-        output += '// Derived from PHP 8.5.0; see grammar/README.md for notices.\n'
+        output += '// Compiled from independent language contracts; see LANGUAGE.md.\n'
         output += table_data(root, symbols) + rule_data(root, symbols)
         files = {
             ROOT / 'src/syntax/tables.rs': format_rust(output),

@@ -2,15 +2,13 @@
 
 A PHP implementation in Rust, with a long-term goal of becoming a production
 replacement for PHP, targeting PHP 8.x.x. The current stage is PHP syntax support.
-The working tree implements a byte-oriented lexer, a parser derived from the
-PHP 8.5.0 grammar,
-and a syntax-checking CLI. Execution remains deferred.
+The working tree implements a byte-oriented lexer, an independently authored
+PHP 8.5 syntax grammar, a Rust parser and a syntax-checking CLI. Execution remains
+deferred. Language rules come from specifications and observable behavior;
+PHP implementation sources and PHP-derived grammar extraction have been removed.
+Prior source exposure is disclosed; strict clean-room separation is not claimed.
+Safety and speed remain measured acceptance goals.
 
-The current grammar tables were derived from PHP implementation source. That
-approach is superseded by the owner's independent-implementation requirement
-(PHPRS-090). They must be replaced with an independently authored language
-contract based only on specifications and observable behavior; no clean-room
-separation is claimed. Safety and speed remain measured acceptance goals.
 [LANGUAGE.md](LANGUAGE.md) defines the independent requirements.
 `grammar/vocabulary.json` records language-level token classes and spellings
 from documentation and public tokenization observations, without PHP token IDs.
@@ -36,16 +34,13 @@ that stream is writable. Syntax diagnostics report byte offsets.
 
 The parser handles tags and HTML, expressions, statements, callable and object
 syntax, types, attributes, enums, interpolation, heredoc/nowdoc and namespaces.
-Its tables preserve the upstream grammar's productions and precedence. This is
-syntax acceptance, not PHP semantic validation, name resolution, compilation,
-or runtime compatibility. Tests cover representative language families and a
-bounded invalid-input corpus; they do not establish equivalence for all inputs.
-PHP 8.x.x is the target family, with PHP 8.5.0 as the single syntax baseline.
-The table integration is implemented; scanner extensions remain in progress
-for property comments. Asymmetric visibility and void casts are implemented
-and covered by exact-token, position and malformed-boundary tests. The local PHP
-8.3.6 oracle validates shared syntax only. New PHP 8.5 fixtures are specified
-against the pinned grammar; native 8.5 comparison remains outstanding.
+Its tables are compiled from the project's own language grammar. This is syntax
+acceptance, not name resolution, constant evaluation or runtime compatibility.
+Tests cover representative families and bounded invalid inputs; they do not
+establish equivalence for all inputs. PHP 8.x.x is the target family, with PHP 8.5
+as the selected language baseline. The local PHP 8.3.6 oracle validates shared
+syntax only. PHP 8.5-only fixtures follow the independent language contract;
+native 8.5 comparison remains outstanding.
 Production acceptance versions and application coverage remain undecided.
 There are no compatibility-only shims for previous phprs APIs or PHP versions
 outside the target. Syntax supported by PHP 8 remains part of the language.
@@ -111,10 +106,10 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 45 Rust tests and 20 Python tests, including
+Verification on 2026-10-23 passes 49 Rust tests and 20 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP acceptance comparisons and deterministic generation of
-1,193 states and 624 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
+1,114 states and 634 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
 each measured production Rust function/closure. SonarQube complexity measurement
 is unavailable locally; its required evidence remains outstanding in
 [TODO.md](TODO.md). No full syntax-stage quality sign-off or production support

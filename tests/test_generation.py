@@ -9,28 +9,33 @@ from tools import generate_parser as generator
 
 
 class GrammarTests(unittest.TestCase):
-    def test_action_removal_respects_c_literals(self):
-        source = '''rule: '{' { if (x) { f("}"); } /* } */ f('}'); } word // {\n | %empty;'''
-        self.assertEqual(generator.remove_actions(source), "rule: '{'  word \n | %empty;")
+    def test_reject_embedded_actions_phprs_090(self):
+        generator.validate_fragment("rule: '{' '}' ; /* { ignored } */")
+        for source in ['rule: T_X { action(); };', '%code { embedded; }', 'rule: T_X } ;']:
+            with self.assertRaises(ValueError):
+                generator.validate_fragment(source)
 
     def test_independent_grammar_preserves_precedence(self):
-        source = '%code {ignore}\n%token <ast> T_X "x"\n%left T_X\n%%\nstart: T_X { f(); } | %empty;\n%%\nunused'
-        result = generator.grammar_text(source)
-        self.assertIn('%token  T_X "x"', result)
-        self.assertIn('%left T_X', result)
-        self.assertIn('start: T_X  | %empty;', result)
-        self.assertNotIn('f()', result)
+        sections = ['%left T_X\n', 'start: T_X;\n', '', '']
+        with patch.object(Path, 'read_text', side_effect=sections):
+            result = generator.grammar_text({'tokens': ['T_X']})
+        self.assertIn('%token T_X\n', result)
+        self.assertIn('%left T_X\n', result)
+        self.assertIn('start: T_X;', result)
+        self.assertIn('%expect 0', result)
 
     def test_reduction_encoding(self):
         self.assertEqual(generator.reduction_value('accept'), 32767)
         self.assertEqual(generator.reduction_value('3'), -4)
 
     def test_grammar_whitespace_phprs_036(self):
-        source = '%token T_TEXT "a\tb"  \n%%\n \tstart: T_TEXT { action(); } \t\n\t| \' \' ; \t\n%%\n'
-        result = generator.grammar_text(source)
-        self.assertIn('%token T_TEXT "a\tb"\n', result)
+        sections = ['%left T_TEXT  \n', " \tstart: T_TEXT \t\n\t| ' ' ; \t\n", 'literal: "a\tb";\n', '']
+        with patch.object(Path, 'read_text', side_effect=sections):
+            result = generator.grammar_text({'tokens': ['T_TEXT']})
+        self.assertIn('%left T_TEXT\n', result)
         self.assertIn('    start: T_TEXT\n', result)
         self.assertIn("    | ' ' ;\n", result)
+        self.assertIn('literal: "a\tb";', result)
         self.assertTrue(result.endswith('\n'))
         for line in result.splitlines():
             self.assertEqual(line, line.rstrip(' \t'))
@@ -57,12 +62,12 @@ class GrammarTests(unittest.TestCase):
     def test_array_and_lexer_maps(self):
         self.assertIn('static EMPTY', generator.rust_array('EMPTY', 'u8', []))
         self.assertIn('12,', generator.rust_array('LONG', 'u8', list(map(str, range(13)))))
-        declarations = [('T_A', json.dumps("'echo'")), ('T_B', json.dumps("'++'")), ('T_C', ''), ('T_D', json.dumps("'${'"))]
-        symbols = {alias: index for index, (_, alias) in enumerate(declarations)}
-        result = generator.lexical_maps(declarations, symbols)
+        vocabulary = {'keywords': {'echo': 'T_A'}, 'operators': {'++': 'T_B'}, 'casts': {'int': 'T_C'}}
+        result = generator.lexical_maps(vocabulary, {'T_A': 0, 'T_B': 1, 'T_C': 2})
         self.assertIn('("echo", 0)', result)
         self.assertIn('(b"++", 1)', result)
-        self.assertNotIn('(b"${"', result)
+        self.assertIn('(b"int", 2)', result)
+        self.assertIn('static CASTS', result)
 
     def test_sparse_rule_labels_phprs_014(self):
         report = ET.fromstring('<report><grammar><rules><rule><lhs>start</lhs><rhs><symbol>x</symbol></rhs></rule></rules></grammar></report>')

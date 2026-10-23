@@ -656,3 +656,45 @@ fn shebang_spans_and_bounds_phprs_043() {
         ErrorKind::Limit
     );
 }
+
+#[test]
+fn syntax_destination_rejections_phprs_097() {
+    for source in [
+        "<?php ++1;",
+        "<?php --true;",
+        "<?php ++[1];",
+        "<?php ++($x);",
+        "<?php $x = &1;",
+        "<?php foreach([] as 1) {}",
+        "<?php foreach([] as 1=>$v) {}",
+        "<?php unset(1);",
+        "<?php C::X = 2;",
+        "<?php named = 2;",
+    ] {
+        assert!(!php_accepts(source.as_bytes()), "oracle: {source}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
+
+#[test]
+fn syntax_destination_call_forms_phprs_097() {
+    for source in [
+        "<?php ++f();",
+        "<?php f()=1;",
+        "<?php unset(f());",
+        "<?php foreach([] as f()){}",
+        "<?php $x=&f();",
+        "<?php $x=&$y+1;",
+        "<?php $x=&f()+1;",
+        "<?php ++$x+1;",
+        "<?php $x?->p=1;",
+        "<?php $x[0]=1;",
+        "<?php C::$x=2;",
+    ] {
+        assert!(php_accepts(source.as_bytes()), "oracle: {source}");
+        common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
+    }
+}
