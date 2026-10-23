@@ -3,7 +3,7 @@ use super::NodeView;
 use crate::contracts::{Diagnostic, SyntaxKind};
 use std::ops::Range;
 
-fn admitted(view: &NodeView<'_>, children: Range<usize>) -> Option<&'static [&'static str]> {
+fn admitted_member(view: &NodeView<'_>, children: Range<usize>) -> Option<&'static [&'static str]> {
     let indices = view.edges.get(children)?;
     let declaration = view.nodes.get(*indices.get(2)?)?;
     match declaration.kind {
@@ -20,9 +20,36 @@ fn admitted(view: &NodeView<'_>, children: Range<usize>) -> Option<&'static [&'s
     }
 }
 
-fn modifier_children(view: &NodeView<'_>, children: Range<usize>) -> Option<Range<usize>> {
+fn admitted(
+    rule: &str,
+    view: &NodeView<'_>,
+    children: Range<usize>,
+) -> Option<&'static [&'static str]> {
+    if rule == "parameter" {
+        return Some(&[
+            "T_PUBLIC",
+            "T_PROTECTED",
+            "T_PRIVATE",
+            "T_PUBLIC_SET",
+            "T_PROTECTED_SET",
+            "T_PRIVATE_SET",
+            "T_READONLY",
+            "T_FINAL",
+        ]);
+    }
+    admitted_member(view, children)
+}
+
+fn modifier_children(
+    rule: &str,
+    view: &NodeView<'_>,
+    children: Range<usize>,
+) -> Option<Range<usize>> {
     let indices = view.edges.get(children)?;
     let wrapper = *indices.get(1)?;
+    if rule == "parameter" {
+        return Some(view.nodes.get(wrapper)?.children.clone());
+    }
     let modifiers = view.one_child(wrapper)?;
     Some(view.nodes.get(modifiers)?.children.clone())
 }
@@ -42,11 +69,15 @@ fn check(view: &NodeView<'_>, children: Range<usize>, allowed: &[&str]) -> Resul
     Ok(())
 }
 
-pub(super) fn validate(view: &NodeView<'_>, children: Range<usize>) -> Result<(), Diagnostic> {
-    let Some(allowed) = admitted(view, children.clone()) else {
+pub(super) fn validate(
+    rule: &str,
+    view: &NodeView<'_>,
+    children: Range<usize>,
+) -> Result<(), Diagnostic> {
+    let Some(allowed) = admitted(rule, view, children.clone()) else {
         return Ok(());
     };
-    let Some(modifiers) = modifier_children(view, children) else {
+    let Some(modifiers) = modifier_children(rule, view, children) else {
         return Ok(());
     };
     check(view, modifiers, allowed)
@@ -65,6 +96,6 @@ mod tests {
         };
         assert!(check(&view, 0..1, &[]).is_err());
         assert!(check(&view, 0..0, &[]).is_ok());
-        assert!(validate(&view, 0..1).is_ok());
+        assert!(validate("member", &view, 0..1).is_ok());
     }
 }

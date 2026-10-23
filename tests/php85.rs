@@ -514,3 +514,18 @@ fn asymmetric_visibility_ordering_phprs_102() {
         }
     }
 }
+
+#[test]
+fn promotion_modifier_applicability_phprs_105() {
+    verify_sources_and_prefixes(&[
+        "<?php class C { function __construct(public int $x, readonly int $y, final protected int $z) {} }",
+        "<?php class C { function __construct(final public private(set) int $x) {} }",
+    ]);
+    for modifiers in ["static", "abstract", "public static", "public abstract"] {
+        let source = format!("<?php class C {{ function __construct({modifiers} int $x) {{}} }}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

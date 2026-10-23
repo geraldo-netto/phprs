@@ -15,6 +15,8 @@ is disclosed; this project does not claim strict clean-room separation.
 Documentation consulted on 2026-10-23:
 
 - [Class basics and construction](https://www.php.net/manual/en/language.oop5.basic.php)
+- [Constructors and promotion](https://www.php.net/manual/en/language.oop5.decon.php)
+- [Final declarations](https://www.php.net/manual/en/language.oop5.final.php)
 - [Object cloning](https://www.php.net/manual/en/language.oop5.cloning.php)
 - [exit](https://www.php.net/manual/en/function.exit.php)
 - [Functional operators](https://www.php.net/manual/en/language.operators.functional.php)
