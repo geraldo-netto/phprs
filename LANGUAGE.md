@@ -14,6 +14,7 @@ is disclosed; this project does not claim strict clean-room separation.
 
 Documentation consulted on 2026-10-23:
 
+- [Class basics and construction](https://www.php.net/manual/en/language.oop5.basic.php)
 - [Object cloning](https://www.php.net/manual/en/language.oop5.cloning.php)
 - [exit](https://www.php.net/manual/en/function.exit.php)
 - [Functional operators](https://www.php.net/manual/en/language.operators.functional.php)
@@ -66,7 +67,9 @@ left-grouped shorthand ternary chains. Reject unparenthesized adjacent ternaries
 when either has a middle operand, as required by the documented PHP 8 language
 restriction, even though the local raw-token parser delays that check until
 compilation. Nested middle operands and explicit parentheses remain admitted.
-Group calls, construction and member/index access explicitly. Distinguish
+Group calls, construction and member/index access explicitly. Named class targets
+remain distinct from dynamic variable/property references; member access on a new
+object without surrounding parentheses requires constructor parentheses. Distinguish
 syntactic destination forms, destructuring patterns and value expressions.
 Variable-like syntax can include calls or nullsafe access; compiler-only
 writability restrictions remain outside parsing. Literal/constant destinations

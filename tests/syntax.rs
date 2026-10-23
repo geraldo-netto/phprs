@@ -782,3 +782,28 @@ fn ternary_chains_phprs_103() {
         }
     }
 }
+
+#[test]
+fn dynamic_class_targets_phprs_055() {
+    for (expression, accepted) in [
+        ("new $factory->className()", true),
+        ("new $classes[0]()", true),
+        ("new C::$class", true),
+        ("new $object::$class[0]", true),
+        ("new ($factory())", true),
+        ("$x instanceof C::$class", true),
+        ("new C->p", false),
+        ("new C[0]", false),
+        ("new C::X", false),
+        ("new $object::X", false),
+        ("new ($factory())[0]", false),
+    ] {
+        let source = format!("<?php {expression};");
+        assert_eq!(php_accepts(source.as_bytes()), accepted, "{source}");
+        let result = PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS);
+        assert_eq!(result.is_ok(), accepted, "{source}");
+        if let Ok(tree) = result {
+            common::verify_tree(&tree);
+        }
+    }
+}

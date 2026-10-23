@@ -326,3 +326,43 @@ fn clone_exit_malformed_phprs_054() {
         );
     }
 }
+
+#[test]
+fn direct_construction_access_phprs_055() {
+    verify_sources_and_prefixes(&[
+        "<?php new C()->method(); new C()->property; new C()?->property;",
+        "<?php new C()[0]; new C()(); new C()::X; new C()::$property;",
+        "<?php new $class(1)->method(); new ($factory())()->property;",
+        "<?php new $classes[0]()->method(); new $factory->className()->method();",
+        "<?php new C::$class()->method();",
+        "<?php new class { function __invoke() {} }();",
+        "<?php new class(1) extends C { public $x; }->x;",
+        "<?php (new C)->method(); new C; new $class;",
+    ]);
+}
+
+#[test]
+fn construction_boundaries_phprs_055() {
+    for expression in [
+        "new C->p",
+        "new C?->p",
+        "new C[0]",
+        "new C::X",
+        "new C->f()",
+        "new C[0]()",
+        "new C::class()",
+        "new C()->",
+        "new C()[",
+        "new C()?->",
+        "new ()",
+        "new C(,)",
+        "new class( {}",
+        "new C()::",
+    ] {
+        let source = format!("<?php {expression};");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}
