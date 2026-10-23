@@ -880,7 +880,8 @@ fn observed_token_trace(source: &[u8]) -> String {
     use std::process::{Command, Stdio};
     let program = concat!(
         "$p=0;foreach(token_get_all(stream_get_contents(STDIN)) as $t){",
-        "if(is_array($t)){$n=token_name($t[0]);$s=$t[1];}else{$n=\"'\".$t.\"'\";$s=$t;}",
+        "if(is_array($t)){$n=token_name($t[0]);$s=$t[1];}else{",
+        "$n=\"'\".(strtolower($t)==='b\"'?'\"':$t).\"'\";$s=$t;}",
         "$e=$p+strlen($s);",
         "if(!in_array($n,['T_OPEN_TAG','T_WHITESPACE','T_COMMENT','T_DOC_COMMENT'],true)){",
         "$n=match($n){'T_OPEN_TAG_WITH_ECHO'=>'T_ECHO','T_CLOSE_TAG'=>\"';'\",default=>$n};",
@@ -1010,6 +1011,60 @@ fn numeric_invalid_boundaries_phprs_110() {
         assert!(
             PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
             "{source}"
+        );
+    }
+}
+
+#[test]
+fn string_token_boundaries_phprs_111() {
+    for &(name, source) in VALID {
+        if [
+            "strings",
+            "interpolation",
+            "nested_interpolation",
+            "heredoc",
+            "heredoc_indent",
+            "binary_heredoc",
+            "binary_bytes",
+        ]
+        .contains(&name)
+        {
+            assert_token_trace(source);
+        }
+    }
+    for source in [
+        br#"<?php echo "\x41\101\u{41} $a[0xF] {$o?->method()}";"#.as_slice(),
+        br#"<?php echo b"$value", B'raw', "{$a["{$key}"]}";"#,
+        b"<?php $x=<<<END\n$object->property {$array['key']}\nEND;",
+        b"<?php $x=<<<'END'\n${not_interpolated}\\u{110000}\nEND;",
+    ] {
+        assert_token_trace(source);
+    }
+    for indent in 0..=3 {
+        for newline in ["\n", "\r\n"] {
+            let pad = " ".repeat(indent);
+            let source = format!("<?php $x=<<<END{newline}{pad}$value{newline}{pad}END;");
+            assert_token_trace(source.as_bytes());
+        }
+    }
+}
+
+#[test]
+fn string_invalid_boundaries_phprs_111() {
+    for source in [
+        br#"<?php echo "\u{}";"#.as_slice(),
+        br#"<?php echo "\u{110000}";"#,
+        br#"<?php echo "\u{xyz}";"#,
+        b"<?php echo \"unfinished\\",
+        b"<?php $x=<<<END\n space\n  END;",
+        b"<?php $x=<<<END\n \ttext\n \tEND;",
+        b"<?php $x=<<<'END\ntext\nEND;",
+        b"<?php $x=<<<END text\nEND;",
+    ] {
+        assert!(!php_accepts(source), "{source:?}");
+        assert!(
+            PhpParser.parse(source, DEFAULT_OPTIONS).is_err(),
+            "{source:?}"
         );
     }
 }

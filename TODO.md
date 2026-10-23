@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-111 | open | Audit string/interpolation token boundaries | PHPRS-092 | Compare quoted, binary, interpolated, heredoc and nowdoc classes/spans against native observations; retain context-switch, truncation and malformed-indent checks. |
 | PHPRS-112 | open | Audit source-tag and trivia boundaries | PHPRS-092 | Compare tags, HTML, whitespace, comment endings and halt payload behavior against native observations, with option-aware spans and bounded invalid prefixes. |
 | PHPRS-052 | open | Close the independent lexical audit | PHPRS-109, PHPRS-110, PHPRS-111, PHPRS-112 | Verify token spellings, magic names, casts, strings, numbers and contextual modes against language documentation and observable behavior; retain bounded rejection and span tests. Do not inspect PHP implementation sources. |
 | PHPRS-053 | deferred | Compare syntax with a native PHP 8.5 oracle | Owner instruction 2026-10-23: skip native 8.5 validation and continue implementation | Native PHP 8.5 comparison is explicitly deferred; only PHP 8.3.6 is installed. Revisit only on owner resumption with an available executable or explicit transfer authorization. Do not claim native 8.5 equivalence. |
