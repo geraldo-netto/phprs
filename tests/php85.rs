@@ -272,3 +272,57 @@ fn pipe_boundaries_phprs_047() {
         );
     }
 }
+
+fn verify_sources_and_prefixes(sources: &[&str]) {
+    for source in sources {
+        let tree = PhpParser
+            .parse(source.as_bytes(), DEFAULT_OPTIONS)
+            .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+        common::verify_tree(&tree);
+        for end in 0..source.len() {
+            if let Ok(tree) = PhpParser.parse(&source.as_bytes()[..end], DEFAULT_OPTIONS) {
+                common::verify_tree(&tree);
+            }
+        }
+    }
+}
+
+#[test]
+fn clone_exit_call_forms_phprs_054() {
+    verify_sources_and_prefixes(&[
+        "<?php clone $o; clone($o); clone(); clone($o,);",
+        "<?php $x = clone($o, ['a' => 1],);",
+        "<?php $x = clone(object: $o, withProperties: ['a' => 1]);",
+        "<?php $x = clone(...$args); $f = clone(...);",
+        "<?php $x = clone($o,)->property; $x = clone($o, [])?->method();",
+        "<?php $x = (clone $o)->property; $x = clone($o)->property;",
+        "<?php exit; die; exit(); die(); exit(1,);",
+        "<?php exit(status: 1); die(status: 'done',);",
+        "<?php exit(...$args); die(...$args); $f = exit(...); $f = die(...);",
+        "<?php exit(1, 2); clone($o, [], 3);", // Arity is checked outside syntax.
+    ]);
+}
+
+#[test]
+fn clone_exit_malformed_phprs_054() {
+    for expression in [
+        "clone",
+        "clone(,)",
+        "clone($o,,)",
+        "clone(object:)",
+        "clone(...,)",
+        "clone(...$args,,)",
+        "exit(,)",
+        "exit(status:)",
+        "exit(...,)",
+        "die(1,,)",
+        "exit 1",
+        "die 'text'",
+    ] {
+        let source = format!("<?php {expression};");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+}

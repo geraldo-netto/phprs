@@ -10,7 +10,6 @@
 
 | id | status | feature | dependencies | completion condition |
 |---|---|---|---|---|
-| PHPRS-054 | open | Verify clone and exit callable forms | PHPRS-090 | Cover named/unpacked/trailing/first-class argument forms and clone's parenthesis ambiguity; reject malformed argument lists without executing input. |
 | PHPRS-055 | open | Verify direct new-expression dereferencing | PHPRS-090 | Cover calls, property/nullsafe access, offsets and dynamic/anonymous construction; reject bare-new forms excluded by the grammar. |
 | PHPRS-056 | open | Verify attributed global constants | PHPRS-090 | Cover attribute groups, lists and namespace scopes on global constants; reject invalid attribute placement and incomplete declarations. |
 | PHPRS-049 | open | Verify property-hook syntax and __PROPERTY__ | PHPRS-090, PHPRS-045 | Cover block/arrow/abstract and attributed hooks, references, parameter lists and promoted hooks; distinguish grammar acceptance from compile-time restrictions and retain malformed/truncation tests. |

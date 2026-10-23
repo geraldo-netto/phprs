@@ -14,6 +14,8 @@ is disclosed; this project does not claim strict clean-room separation.
 
 Documentation consulted on 2026-10-23:
 
+- [Object cloning](https://www.php.net/manual/en/language.oop5.cloning.php)
+- [exit](https://www.php.net/manual/en/function.exit.php)
 - [Functional operators](https://www.php.net/manual/en/language.operators.functional.php)
 - [PHP 8.5 language additions](https://www.php.net/manual/en/migration85.new-features.php)
 - [Operator precedence](https://www.php.net/manual/en/language.operators.precedence.php)
