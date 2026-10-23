@@ -104,7 +104,9 @@ asymmetric set visibility and __PROPERTY__ without copying engine productions.
 Admit each get/set hook at most once, including reference-return variants, and
 reject other hook names.
 Specify modifier rejection as a separate language policy, with independently
-chosen tests and clear syntax-versus-compilation boundaries.
+chosen tests and clear syntax-versus-compilation boundaries. Methods admit
+visibility, static, abstract and final; class constants admit visibility and
+final. Readonly and setter-visibility modifiers are property forms.
 
 ## Results, ownership and limits
 

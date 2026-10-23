@@ -1,0 +1,70 @@
+//! Declaration-specific modifier contracts over the borrowed syntax view.
+use super::NodeView;
+use crate::contracts::{Diagnostic, SyntaxKind};
+use std::ops::Range;
+
+fn admitted(view: &NodeView<'_>, children: Range<usize>) -> Option<&'static [&'static str]> {
+    let indices = view.edges.get(children)?;
+    let declaration = view.nodes.get(*indices.get(2)?)?;
+    match declaration.kind {
+        SyntaxKind::Token("T_FUNCTION") => Some(&[
+            "T_PUBLIC",
+            "T_PROTECTED",
+            "T_PRIVATE",
+            "T_STATIC",
+            "T_ABSTRACT",
+            "T_FINAL",
+        ]),
+        SyntaxKind::Token("T_CONST") => Some(&["T_PUBLIC", "T_PROTECTED", "T_PRIVATE", "T_FINAL"]),
+        _ => None,
+    }
+}
+
+fn modifier_children(view: &NodeView<'_>, children: Range<usize>) -> Option<Range<usize>> {
+    let indices = view.edges.get(children)?;
+    let wrapper = *indices.get(1)?;
+    let modifiers = view.one_child(wrapper)?;
+    Some(view.nodes.get(modifiers)?.children.clone())
+}
+
+fn check(view: &NodeView<'_>, children: Range<usize>, allowed: &[&str]) -> Result<(), Diagnostic> {
+    let mut next = Some((children.clone(), view.nodes.len()));
+    while let Some((range, bound)) = next {
+        let step = view
+            .modifier_step(range, bound)
+            .map_err(|()| view.diagnostic(children.clone(), "invalid modifier structure"))?;
+        let Some(step) = step else { break };
+        if !allowed.contains(&step.name) {
+            return Err(view.diagnostic(children, "modifier is invalid for this declaration"));
+        }
+        next = step.next;
+    }
+    Ok(())
+}
+
+pub(super) fn validate(view: &NodeView<'_>, children: Range<usize>) -> Result<(), Diagnostic> {
+    let Some(allowed) = admitted(view, children.clone()) else {
+        return Ok(());
+    };
+    let Some(modifiers) = modifier_children(view, children) else {
+        return Ok(());
+    };
+    check(view, modifiers, allowed)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn malformed_declaration_views_phprs_101() {
+        let view = NodeView {
+            source: b"",
+            nodes: &[],
+            edges: &[],
+        };
+        assert!(check(&view, 0..1, &[]).is_err());
+        assert!(check(&view, 0..0, &[]).is_ok());
+        assert!(validate(&view, 0..1).is_ok());
+    }
+}

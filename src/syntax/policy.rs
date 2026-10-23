@@ -1,4 +1,5 @@
 //! Syntax-shape checks over independent tree contracts, without parser state.
+mod declarations;
 mod hooks;
 use crate::contracts::{Diagnostic, ErrorKind, SyntaxKind, SyntaxNode};
 use std::ops::Range;
@@ -128,6 +129,9 @@ pub(super) fn validate_rule(
     view: NodeView<'_>,
     children: Range<usize>,
 ) -> Result<(), Diagnostic> {
+    if rule == "member" {
+        return declarations::validate(&view, children);
+    }
     if rule == "hooks" {
         return hooks::validate(&view, children);
     }

@@ -807,3 +807,32 @@ fn dynamic_class_targets_phprs_055() {
         }
     }
 }
+
+#[test]
+fn declaration_modifier_applicability_phprs_101() {
+    for member in [
+        "readonly function f() {}",
+        "static const X=1;",
+        "abstract const X=1;",
+        "readonly const X=1;",
+        "public static const int X=1;",
+        "protected abstract const X=1;",
+    ] {
+        let source = format!("<?php class C {{ {member} }}");
+        assert!(!php_accepts(source.as_bytes()), "{source}");
+        assert!(
+            PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+            "{source}"
+        );
+    }
+    for member in [
+        "public static function f() {}",
+        "final protected function f() {}",
+        "final public const X=1;",
+        "protected const int X=1;",
+    ] {
+        let source = format!("<?php class C {{ {member} }}");
+        assert!(php_accepts(source.as_bytes()), "{source}");
+        common::verify_tree(&PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).unwrap());
+    }
+}

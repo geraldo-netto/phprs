@@ -472,3 +472,16 @@ fn hook_name_rejections_phprs_104() {
         );
     }
 }
+
+#[test]
+fn setter_modifiers_require_properties_phprs_101() {
+    for modifier in ["public(set)", "protected(set)", "private(set)"] {
+        for member in ["function f() {}", "const X=1;"] {
+            let source = format!("<?php class C {{ {modifier} {member} }}");
+            assert!(
+                PhpParser.parse(source.as_bytes(), DEFAULT_OPTIONS).is_err(),
+                "{source}"
+            );
+        }
+    }
+}
