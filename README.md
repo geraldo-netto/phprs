@@ -11,6 +11,9 @@ approach is superseded by the owner's independent-implementation requirement
 (PHPRS-090). They must be replaced with an independently authored language
 contract based only on specifications and observable behavior; no clean-room
 separation is claimed. Safety and speed remain measured acceptance goals.
+[LANGUAGE.md](LANGUAGE.md) defines the independent requirements.
+`grammar/vocabulary.json` records language-level token classes and spellings
+from documentation and public tokenization observations, without PHP token IDs.
 
 ## Check a file
 
@@ -108,7 +111,7 @@ checked source. See
 [grammar/README.md](grammar/README.md) for source identity, licensing notices and
 offline table regeneration.
 
-Verification on 2026-10-23 passes 45 Rust tests and 17 Python tests, including
+Verification on 2026-10-23 passes 45 Rust tests and 20 Python tests, including
 4,096 generated malformed-byte cases, every prefix of the positive fixtures,
 Shared-syntax PHP acceptance comparisons and deterministic generation of
 1,193 states and 624 rules. Fresh LLVM counters meet 80 percent executable-line coverage for
